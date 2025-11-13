@@ -10,6 +10,7 @@ A modern, full-stack website for a creative architecture and design studio, insp
 - 🧭 **About Page** - Studio introduction, founders section, philosophy block, and awards/press section
 - ✉️ **Contact Page** - Contact form with EmailJS integration, Google Maps embed, and contact information
 - 📰 **News/Journal Page** - Blog-style layout with article listings and individual article pages
+- 💥 **Dynamite Page** - Floating window collage with drag-and-drop functionality
 - ⚡ **Animations** - Smooth scrolling, parallax effects, fade/slide animations, image zoom on hover, and page transitions
 - 📱 **Responsive Design** - Fully responsive across desktop, tablet, and mobile devices
 - 🎨 **Modern UI** - Minimal black/white theme with elegant transitions and strong contrast
@@ -20,7 +21,7 @@ A modern, full-stack website for a creative architecture and design studio, insp
 - **TypeScript**
 - **Tailwind CSS**
 - **Framer Motion** - For animations
-- **React Lenis** - For smooth scrolling
+- **Lenis** - For smooth scrolling
 - **EmailJS** - For contact form submissions
 - **Next/Image** - For optimized image loading
 - **Lucide React** - For icons
@@ -35,8 +36,8 @@ A modern, full-stack website for a creative architecture and design studio, insp
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd Frontend_Mehul_bhai
+git clone https://github.com/DhruvR0/Frontend_Blueprint.git
+cd Frontend_Blueprint
 ```
 
 2. Install dependencies:
@@ -104,6 +105,8 @@ Alternatively, you can use environment variables and update the component to rea
 │   │   ├── page.tsx            # News listing page
 │   │   └── [id]/
 │   │       └── page.tsx        # Individual article page
+│   ├── dynamite/
+│   │   └── page.tsx            # Floating window collage page
 │   ├── globals.css             # Global styles
 │   └── not-found.tsx           # 404 page
 ├── components/
@@ -111,13 +114,15 @@ Alternatively, you can use environment variables and update the component to rea
 │   ├── Footer.tsx              # Footer with links and social icons
 │   ├── HeroSection.tsx         # Reusable hero section component
 │   ├── ProjectCard.tsx         # Project card component
-│   ├── ContactForm.tsx         # Contact form with EmailJS
+│   ├── ContactForm.tsx        # Contact form with EmailJS
 │   ├── AnimatedText.tsx        # Text animation wrapper
 │   ├── SmoothScroll.tsx        # Smooth scrolling wrapper
 │   ├── Preloader.tsx           # Preloader animation
-│   └── PageTransition.tsx      # Page transition wrapper
+│   ├── PageTransition.tsx      # Page transition wrapper
+│   ├── FloatingWindow.tsx     # Floating window component for Dynamite page
+│   └── AppFooter.tsx           # Conditional footer component
 ├── utils/
-│   └── data.ts                 # Sample data (projects, news, founders)
+│   └── data.ts                 # Sample data (projects, news, founders, dynamite items)
 └── public/                     # Static assets
 ```
 
@@ -195,6 +200,7 @@ npm start
 - Image zoom-in on hover
 - Page transitions with fade-in/fade-out
 - Lazy-load images for performance
+- Floating window collage with drag-and-drop functionality
 
 ### Responsive Design
 - Mobile-first approach
@@ -217,4 +223,3 @@ This project is open source and available under the MIT License.
 - Design inspired by [Partisans](https://partisans.com)
 - Images from [Unsplash](https://unsplash.com)
 - Icons from [Lucide](https://lucide.dev)
-
