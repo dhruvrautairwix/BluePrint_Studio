@@ -10,32 +10,30 @@ import AppFooter from "@/components/AppFooter";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Studio Architecture & Design",
-  description: "Creative architecture and design studio making the improbable possible.",
+  description: "Creative architecture and design studio.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="antialiased">
+      <body className="bg-black text-white antialiased min-h-screen overflow-x-hidden">
         <Preloader />
+
+        {/* Prevents hydration mismatch */}
         <SmoothScroll>
           <Navbar />
+
           <PageTransition>
-            <main className="min-h-screen">{children}</main>
+            <main className="min-h-screen w-full">{children}</main>
           </PageTransition>
+
           <AppFooter />
         </SmoothScroll>
       </body>
     </html>
   );
 }
-

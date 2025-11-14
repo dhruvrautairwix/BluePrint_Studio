@@ -3,31 +3,19 @@
 import { ReactNode, useEffect } from "react";
 import Lenis from "lenis";
 
-interface SmoothScrollProps {
-  children: ReactNode;
-}
-
-export default function SmoothScroll({ children }: SmoothScrollProps) {
+export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      smoothWheel: true,
-      smoothTouch: true,
-      lerp: 0.1,
-    });
+    const lenis = new Lenis({ duration: 1.2, smoothWheel: true });
 
-    function raf(time: number) {
-      lenis.raf(time);
+    const raf = (t: number) => {
+      lenis.raf(t);
       requestAnimationFrame(raf);
-    }
+    };
 
     requestAnimationFrame(raf);
 
-    return () => {
-      lenis.destroy();
-    };
+    return () => lenis.destroy();
   }, []);
 
   return <>{children}</>;
 }
-

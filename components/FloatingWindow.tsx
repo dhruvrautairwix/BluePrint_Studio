@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, useReducedMotion, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import type { DynamiteItem } from "@/utils/data";
 
@@ -26,48 +27,134 @@ export default function FloatingWindow({
   isMobile = false,
 }: FloatingWindowProps) {
   const prefersReducedMotion = useReducedMotion();
-  const targetX = isMobile ? 0 : initialPosition?.x ?? 0;
-  const targetY = isMobile ? 0 : initialPosition?.y ?? 0;
+
   const windowWidth = item.dimensions?.width ?? 420;
   const windowHeight = item.dimensions?.height ?? 320;
   const mediaHeight = Math.max(180, windowHeight - 80);
-  const rotation = 0;
+
+  const x = useMotionValue(isMobile ? 0 : initialPosition?.x ?? 0);
+  const y = useMotionValue(isMobile ? 0 : initialPosition?.y ?? 0);
+
+  const [dragConstraints, setDragConstraints] = useState({
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  });
+
+  // Constraint calculation
+  const calculateConstraints = () => {
+    if (typeof window === "undefined" || !dragScope.current || isMobile)
+      return { left: 0, right: 0, top: 0, bottom: 0 };
+
+    const rect = dragScope.current.getBoundingClientRect();
+    const margin = 20;
+
+    const maxX = Math.max(0, rect.width / 2 - windowWidth / 2 - margin);
+    const maxY = Math.max(0, rect.height / 2 - windowHeight / 2 - margin);
+
+    return { left: -maxX, right: maxX, top: -maxY, bottom: maxY };
+  };
+
+  const clamp = (cx: number, cy: number) => {
+    if (isMobile) return { x: 0, y: 0 };
+
+    const c = calculateConstraints();
+
+    return {
+      x: Math.max(c.left, Math.min(c.right, cx)),
+      y: Math.max(c.top, Math.min(c.bottom, cy)),
+    };
+  };
+
+  // Initialize position AFTER layout is ready
+  useEffect(() => {
+    if (isMobile) {
+      x.set(0);
+      y.set(0);
+      setDragConstraints({ left: 0, right: 0, top: 0, bottom: 0 });
+      return;
+    }
+
+    if (!initialPosition) return;
+
+    const update = () => {
+      if (!dragScope.current) {
+        requestAnimationFrame(update);
+        return;
+      }
+
+      const c = calculateConstraints();
+      setDragConstraints(c);
+
+      const baseX = initialPosition.x ?? 0;
+      const baseY = initialPosition.y ?? 0;
+      const fixed = clamp(baseX, baseY);
+
+      x.set(fixed.x);
+      y.set(fixed.y);
+    };
+
+    requestAnimationFrame(update);
+  }, [windowWidth, windowHeight, isMobile, initialPosition]);
+
+  // Re-clamp on viewport resize
+  useEffect(() => {
+    if (isMobile) return;
+
+    const onResize = () => {
+      const c = calculateConstraints();
+      setDragConstraints(c);
+
+      const fixed = clamp(x.get(), y.get());
+      x.set(fixed.x);
+      y.set(fixed.y);
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const containerClass = isMobile
+    ? "relative w-full bg-black/85 text-white rounded-sm border border-white/20 overflow-hidden select-none cursor-default mb-6"
+    : "absolute bg-black/85 text-white rounded-sm border border-white/20 backdrop-blur-sm overflow-hidden select-none cursor-move -translate-x-1/2 -translate-y-1/2";
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.6, x: 0, y: isMobile ? 20 : 0 }}
-      animate={{ opacity: 1, scale: 1, x: targetX, y: targetY }}
-      transition={{ duration: 0.85, ease: [0.18, 0.8, 0.2, 1] }}
-      exit={{ opacity: 0, scale: 0.9, x: targetX, y: targetY + 40, transition: { duration: 0.3 } }}
-      drag={!prefersReducedMotion}
-      dragConstraints={dragScope.current ?? undefined}
-      dragMomentum={!prefersReducedMotion}
-      dragElastic={0.12}
-      whileDrag={!prefersReducedMotion ? { scale: 1.02, cursor: "grabbing" } : undefined}
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 1.02 }}
+      transition={{ duration: 0.28 }}
+      drag={!prefersReducedMotion && !isMobile}
+      dragConstraints={dragConstraints}
+      dragMomentum={false}
+      dragElastic={0.02}
       onPointerDown={() => onFocus(item.id)}
-      className={`relative md:absolute w-full md:w-auto bg-black/85 text-white shadow-2xl rounded-sm border border-white/20 backdrop-blur-sm overflow-hidden select-none cursor-grab ${
-        isFocused ? "ring-2 ring-white/80" : "ring-0"
-      } ${isMobile ? "mb-6" : "md:-translate-x-1/2 md:-translate-y-1/2"}`}
+      className={`${containerClass} ${isFocused ? "ring-2 ring-white/60" : ""
+        }`}
       style={{
-        zIndex,
-        top: isMobile ? undefined : "50%",
-        left: isMobile ? undefined : "50%",
+        ...(isMobile ? {} : { top: "50%", left: "50%" }),
+        x,
+        y,
         width: isMobile ? "100%" : windowWidth,
+        zIndex,
       }}
     >
-      <header className="flex items-center justify-between px-4 py-2 text-[0.65rem] uppercase tracking-[0.15em] bg-black/70 border-b border-white/10">
-        <span className="truncate pr-3">{item.title}</span>
+      {/* Title Bar */}
+      <header className="flex items-center justify-between px-4 py-3 text-[0.7rem] uppercase tracking-[0.15em] bg-black/75 border-b border-white/10">
+        <span className="truncate">{item.title}</span>
         <button
-          onClick={(event) => {
-            event.stopPropagation();
+          onClick={(e) => {
+            e.stopPropagation();
             onClose(item.id);
           }}
-          className="h-6 w-6 flex items-center justify-center text-white/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          aria-label={`Close ${item.title}`}
+          className="h-7 w-7 flex items-center justify-center hover:bg-white/10 rounded"
         >
           ×
         </button>
       </header>
+
+      {/* Content */}
       <div className="relative bg-black">
         {item.mediaType === "video" ? (
           <video
@@ -77,24 +164,32 @@ export default function FloatingWindow({
             muted
             playsInline
             className="w-full object-cover"
-            style={{ height: isMobile ? Math.min(mediaHeight, 280) : mediaHeight }}
+            style={{ height: mediaHeight }}
           />
         ) : (
-          <div className="relative" style={{ height: isMobile ? Math.min(mediaHeight, 280) : mediaHeight }}>
+          <div className="relative" style={{ height: mediaHeight }}>
             <Image
               src={item.src}
               alt={item.title}
               fill
+              sizes={isMobile ? "100vw" : `${Math.min(windowWidth, 800)}px`}
               className="object-cover"
-              sizes={isMobile ? "92vw" : `${Math.min(windowWidth, 720)}px`}
-              priority={isFocused}
+              priority={false}
             />
+
           </div>
         )}
+
         {(item.subtitle || item.description) && (
-          <div className="px-4 py-3 text-[0.7rem] leading-relaxed bg-black/80">
-            {item.subtitle && <p className="uppercase tracking-[0.25em] text-white/70 mb-2">{item.subtitle}</p>}
-            {item.description && <p className="text-white/80">{item.description}</p>}
+          <div className="px-4 py-3 text-[0.75rem] bg-black/85">
+            {item.subtitle && (
+              <p className="uppercase tracking-[0.2em] text-white/60 mb-1">
+                {item.subtitle}
+              </p>
+            )}
+            {item.description && (
+              <p className="text-white/80">{item.description}</p>
+            )}
           </div>
         )}
       </div>

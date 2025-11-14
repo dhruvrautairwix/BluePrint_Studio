@@ -17,8 +17,8 @@ const quickLinks = [
   { href: "/awards", label: "Awards" },
   { href: "/about", label: "About" },
   { href: "/news", label: "News" },
-  { href: "/contact", label: "Contact" },
   { href: "/dynamite", label: "Dynamite" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Footer() {
