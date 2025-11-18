@@ -17,19 +17,19 @@ export default function ContactPage() {
     {
       id: "phone",
       title: "PHONE",
-      content: "+1 647 846 3428",
+      content: "+1 647 894 7187",
       initialPosition: { x: 150, y: 100 },
     },
     {
       id: "email",
       title: "EMAIL",
-      content: "HELLO@PARTISANS.COM",
+      content: "HELLO@blueprint3dstudios.com",
       initialPosition: { x: 530, y: 280 },
     },
     {
       id: "address",
       title: "ADDRESS",
-      content: ["99 CROWNS LANE", "TORONTO, ON", "M5R 3P4"],
+      content: ["Mississauga, ON"],
       initialPosition: { x: 850, y: 460 },
     },
   ]);
@@ -61,7 +61,7 @@ export default function ContactPage() {
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=2000&h=1300&q=80&ixlib=rb-4.0.3"
+          src="/images/urban-bistro-mississauga-dining-3.png"
           alt="Dark interior background"
           fill
           className="object-cover"

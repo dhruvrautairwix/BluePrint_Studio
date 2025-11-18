@@ -7,9 +7,9 @@ export default function Home() {
     <>
       {/* Hero Section */}
       <HeroSection
-        title="STUDIO"
+        title="Blueprint 3D Studio"
         subtitle="Making the improbable possible"
-        backgroundImage="https://images.unsplash.com/photo-1487958449943-2429e4be02d3?auto=format&fit=crop&w=1920&h=1080&q=80&ixlib=rb-4.0.3"
+        backgroundImage="/images/astron-legal-boardroom.jpg"
       />
     </>
   );

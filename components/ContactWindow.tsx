@@ -120,8 +120,8 @@ export default function ContactWindow({
       className="bg-black border-2 border-white overflow-hidden select-none cursor-move w-[500px] max-w-[90vw]"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 bg-white border-b border-white/20">
-        <span className="text-[11px] uppercase tracking-[0.15em] text-black/90">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-white/20">
+        <span className="text-[11px] uppercase tracking-[0.15em] text-white">
           CONTACT
         </span>
         <button
@@ -129,7 +129,7 @@ export default function ContactWindow({
             e.stopPropagation();
             onClose(id);
           }}
-          className="h-5 w-5 flex items-center justify-center text-black hover:text-black/70 transition-colors text-xl leading-none"
+          className="h-5 w-5 flex items-center justify-center text-white hover:text-white/70 transition-colors text-xl leading-none"
           aria-label={`Close ${title}`}
           onPointerDown={(e) => e.stopPropagation()}
         >

@@ -110,7 +110,7 @@ export default function DynamitePage() {
       {/* BACKGROUND */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=2000&q=80"
+          src="/images/urban-bistro-mississauga-dining-2.png"
           alt=""
           fill
           className="object-cover"

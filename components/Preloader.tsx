@@ -31,7 +31,7 @@ export default function Preloader() {
         transition={{ duration: 0.5 }}
         className="text-white text-4xl font-bold"
       >
-        STUDIO
+        Blueprint 3D Studio
       </motion.div>
     </motion.div>
   );

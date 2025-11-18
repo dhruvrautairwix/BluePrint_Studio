@@ -2,20 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, Mail, FolderOpen, Award, Bomb } from "lucide-react";
+import { Globe, Mail, FolderOpen, Award, House, Bomb, icons } from "lucide-react";
+import Home from "@/app/page";
 
-const navLinks = [
+const navLinks = [{href: "/", label: "Home", icon: House},
   { href: "/about", label: "About", icon: () => <span className="text-3xl font-bold">P</span> },
   { href: "/projects", label: "Projects", icon: Globe },
   { href: "/contact", label: "Contact", icon: Mail },
-  { href: "/dynamite", label: "Dynamite", icon: Bomb },
+  { href: "/dynamite", label: "Dynamite", icon: Bomb }
 ];
 
 export default function PartisansBottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed bottom-6 left-[15%] -translate-x-1/2 flex items-center gap-12 z-50">
+    <div className="fixed bottom-6 left-[20%] -translate-x-1/2 flex items-center gap-12 z-50">
       {navLinks.map((link) => {
         const Icon = link.icon;
         const active = pathname === link.href;
