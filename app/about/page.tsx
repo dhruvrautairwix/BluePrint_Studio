@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import AnimatedText from "@/components/AnimatedText";
 import { founders, awardLogos } from "@/utils/data";
 import { motion } from "framer-motion";
 
@@ -19,36 +18,30 @@ export default function AboutPage() {
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <AnimatedText>
-            <h1 className="text-5xl md:text-7xl font-bold text-white text-center">
-              About Us
-            </h1>
-          </AnimatedText>
+          <h1 className="text-5xl md:text-7xl font-bold text-white text-center">
+            About Us
+          </h1>
         </div>
       </section>
 
       {/* Studio Introduction */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <AnimatedText>
-            <h2 className="text-4xl md:text-5xl font-bold mb-8">Our Studio</h2>
-          </AnimatedText>
-          <AnimatedText delay={0.2}>
-            <div className="prose prose-lg max-w-none text-gray-700">
-              <p className="text-lg leading-relaxed mb-6">
-                Founded with a vision to push the boundaries of architecture and design, our studio
-                brings together a team of passionate creatives, architects, and designers. We
-                believe that great design is not just about aesthetics—it's about creating spaces
-                that enhance lives, inspire communities, and respect the environment.
-              </p>
-              <p className="text-lg leading-relaxed">
-                Our approach is collaborative, innovative, and deeply rooted in understanding the
-                unique needs of each project. From residential homes to commercial spaces, urban
-                planning to interior design, we bring the same level of dedication and excellence
-                to every challenge we undertake.
-              </p>
-            </div>
-          </AnimatedText>
+        <div className="max-w-4xl mx-auto space-y-8 text-gray-700">
+          <h2 className="text-4xl md:text-5xl font-bold">Our Studio</h2>
+          <div className="prose prose-lg max-w-none">
+            <p className="text-lg leading-relaxed">
+              Founded with a vision to push the boundaries of architecture and design, our studio
+              brings together a team of passionate creatives, architects, and designers. We believe
+              that great design is not just about aesthetics—it's about creating spaces that enhance
+              lives, inspire communities, and respect the environment.
+            </p>
+            <p className="text-lg leading-relaxed">
+              Our approach is collaborative, innovative, and deeply rooted in understanding the
+              unique needs of each project. From residential homes to commercial spaces, urban
+              planning to interior design, we bring the same level of dedication and excellence to
+              every challenge we undertake.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -66,27 +59,30 @@ export default function AboutPage() {
       {/* Founders Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <AnimatedText>
-            <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">Founders</h2>
-          </AnimatedText>
+          <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">Founders</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {founders.map((founder, index) => (
-              <AnimatedText key={founder.name} delay={index * 0.2}>
-                <div className="text-center">
-                  <div className="relative w-64 h-64 mx-auto mb-6 rounded-full overflow-hidden">
-                    <Image
-                      src={founder.image}
-                      alt={founder.name}
-                      fill
-                      sizes="(max-width: 768px) 60vw, 240px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">{founder.name}</h3>
-                  <p className="text-gray-600 mb-4">{founder.role}</p>
-                  <p className="text-gray-700 leading-relaxed">{founder.bio}</p>
+              <motion.div
+                key={founder.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="text-center"
+              >
+                <div className="relative w-64 h-64 mx-auto mb-6 rounded-full overflow-hidden">
+                  <Image
+                    src={founder.image}
+                    alt={founder.name}
+                    fill
+                    sizes="(max-width: 768px) 60vw, 240px"
+                    className="object-cover"
+                  />
                 </div>
-              </AnimatedText>
+                <h3 className="text-2xl font-bold mb-2">{founder.name}</h3>
+                <p className="text-gray-600 mb-4">{founder.role}</p>
+                <p className="text-gray-700 leading-relaxed">{founder.bio}</p>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -102,30 +98,24 @@ export default function AboutPage() {
             className="object-cover"
           />
         </div>
-        <div className="max-w-4xl mx-auto relative z-10">
-          <AnimatedText>
-            <h2 className="text-5xl md:text-7xl font-bold mb-8 text-center">
-              We make the improbable possible.
-            </h2>
-          </AnimatedText>
-          <AnimatedText delay={0.2}>
-            <p className="text-xl text-gray-300 text-center leading-relaxed">
-              This is not just our tagline—it's our commitment. We approach every project with
-              bold vision, innovative thinking, and unwavering dedication to turning ambitious
-              ideas into reality.
-            </p>
-          </AnimatedText>
+        <div className="max-w-4xl mx-auto relative z-10 space-y-8 text-center">
+          <h2 className="text-5xl md:text-7xl font-bold">
+            We make the improbable possible.
+          </h2>
+          <p className="text-xl text-gray-300 leading-relaxed">
+            This is not just our tagline—it's our commitment. We approach every project with bold
+            vision, innovative thinking, and unwavering dedication to turning ambitious ideas into
+            reality.
+          </p>
         </div>
       </section>
 
       {/* Awards & Press */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <AnimatedText>
-            <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">
-              Awards & Recognition
-            </h2>
-          </AnimatedText>
+          <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">
+            Awards & Recognition
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {awardLogos.map((award, index) => (
               <motion.div

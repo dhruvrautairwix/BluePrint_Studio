@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import ProjectCard from "@/components/ProjectCard";
-import AnimatedText from "@/components/AnimatedText";
 import { projects, Project } from "@/utils/data";
 
 type Category = "All" | "Architecture" | "Interiors" | "Urban" | "Object";
@@ -42,13 +41,11 @@ export default function ProjectsPage() {
     <div className="pt-20">
       {/* Header */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black text-white">
-        <div className="max-w-7xl mx-auto">
-          <AnimatedText>
-            <h1 className="text-5xl md:text-7xl font-bold mb-4">Projects</h1>
-            <p className="text-xl text-gray-300 max-w-2xl">
-              Explore our portfolio of innovative architecture and design projects.
-            </p>
-          </AnimatedText>
+        <div className="max-w-7xl mx-auto space-y-4">
+          <h1 className="text-5xl md:text-7xl font-bold">Projects</h1>
+          <p className="text-xl text-gray-300 max-w-2xl">
+            Explore our portfolio of innovative architecture and design projects.
+          </p>
         </div>
       </section>
 

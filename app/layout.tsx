@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import Preloader from "@/components/Preloader";
 import PageTransition from "@/components/PageTransition";
-import AppFooter from "@/components/AppFooter";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,8 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PageTransition>
             <main className="min-h-screen w-full">{children}</main>
           </PageTransition>
-
-          <AppFooter />
         </SmoothScroll>
       </body>
     </html>
