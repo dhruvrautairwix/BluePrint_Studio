@@ -17,7 +17,7 @@ export default function ContactPage() {
     {
       id: "phone",
       title: "PHONE",
-      content: "+1 647 894 7187",
+      content: "+1 (647) 894-7187",
       initialPosition: { x: 150, y: 100 },
     },
     {
@@ -29,7 +29,7 @@ export default function ContactPage() {
     {
       id: "address",
       title: "ADDRESS",
-      content: ["Mississauga, ON"],
+      content: ["Mississauga, Ontario, Canada"],
       initialPosition: { x: 850, y: 460 },
     },
   ]);

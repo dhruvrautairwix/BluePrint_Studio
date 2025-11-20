@@ -5,9 +5,8 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const manifestoCopy = [
-  "PARTISANS is an award-winning Toronto-based architecture studio that thrives at the intersection of technology, craft, and storytelling. We invent unexpected ways to choreograph light, volume, and emotion so that every project feels both cinematic and human.",
-  "Our practice is collaborative and experimental. We work shoulder to shoulder with multidisciplinary teams—artists, researchers, fabricators, coders—to transform sketches into experiences. From cultural institutions to private retreats, we chase the audacious ideas that refuse to sit still.",
-  "Beauty, to us, is a consequence of risk. When a design misbehaves it questions assumptions, exposes the hidden potential of a site, and invites people to participate. We embrace that tension because that is where the work becomes alive."
+  "Blueprint 3D Studios is a visualization and design studio based in Mississauga, Canada, specializing in photorealistic 3D renders, architectural walkthroughs, and concept visualization for residential and commercial projects.",
+  "We help architects, designers, and developers bring their ideas to life through high-quality visuals that communicate the essence of every space blending artistic depth with technical precision."
 ];
 
 const windowBlueprint = [
@@ -33,16 +32,16 @@ const windowBlueprint = [
     id: "manifesto",
     title: "ABOUT",
     width: 560,
-    height: 600,
+    height: 520,
     position: { top: 140, left: 540 },
     render: () => (
       <div className="flex h-full flex-col bg-black/90">
         <div className="px-6 pb-6 pt-6">
           <p className="text-[0.75rem] uppercase tracking-[0.35em] text-white/60">
-            Beauty Emerges When Design Misbehaves
+            Blueprint 3D Studios
           </p>
           <p className="mt-4 text-4xl font-black leading-tight text-white md:text-5xl">
-            BEAUTY EMERGES WHEN DESIGN MISBEHAVES
+            BLUEPRINT 3D STUDIOS
           </p>
         </div>
         <div className="flex-1 overflow-y-auto px-6 pb-8 text-lg leading-8 text-zinc-200">

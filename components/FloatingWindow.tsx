@@ -32,8 +32,8 @@ export default function FloatingWindow({
   const windowHeight = item.dimensions?.height ?? 320;
   const mediaHeight = Math.max(180, windowHeight - 80);
 
-  const x = useMotionValue(isMobile ? 0 : initialPosition?.x ?? 0);
-  const y = useMotionValue(isMobile ? 0 : initialPosition?.y ?? 0);
+  const x = useMotionValue(initialPosition?.x ?? 0);
+  const y = useMotionValue(initialPosition?.y ?? 0);
 
   const [dragConstraints, setDragConstraints] = useState({
     left: 0,
@@ -44,7 +44,7 @@ export default function FloatingWindow({
 
   // Constraint calculation
   const calculateConstraints = () => {
-    if (typeof window === "undefined" || !dragScope.current || isMobile)
+    if (typeof window === "undefined" || !dragScope.current)
       return { left: 0, right: 0, top: 0, bottom: 0 };
 
     const rect = dragScope.current.getBoundingClientRect();
@@ -57,8 +57,6 @@ export default function FloatingWindow({
   };
 
   const clamp = (cx: number, cy: number) => {
-    if (isMobile) return { x: 0, y: 0 };
-
     const c = calculateConstraints();
 
     return {
@@ -69,13 +67,6 @@ export default function FloatingWindow({
 
   // Initialize position AFTER layout is ready
   useEffect(() => {
-    if (isMobile) {
-      x.set(0);
-      y.set(0);
-      setDragConstraints({ left: 0, right: 0, top: 0, bottom: 0 });
-      return;
-    }
-
     if (!initialPosition) return;
 
     const update = () => {
@@ -96,12 +87,10 @@ export default function FloatingWindow({
     };
 
     requestAnimationFrame(update);
-  }, [windowWidth, windowHeight, isMobile, initialPosition]);
+  }, [windowWidth, windowHeight, initialPosition]);
 
   // Re-clamp on viewport resize
   useEffect(() => {
-    if (isMobile) return;
-
     const onResize = () => {
       const c = calculateConstraints();
       setDragConstraints(c);
@@ -116,7 +105,7 @@ export default function FloatingWindow({
   }, []);
 
   const containerClass = isMobile
-    ? "relative w-full bg-black/85 text-white rounded-sm border border-white/20 overflow-hidden select-none cursor-default mb-6"
+    ? "relative w-full bg-black/85 text-white rounded-sm border border-white/20 overflow-hidden select-none cursor-move mb-6"
     : "absolute bg-black/85 text-white rounded-sm border border-white/20 backdrop-blur-sm overflow-hidden select-none cursor-move -translate-x-1/2 -translate-y-1/2";
 
   return (
@@ -125,7 +114,7 @@ export default function FloatingWindow({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.02 }}
       transition={{ duration: 0.28 }}
-      drag={!prefersReducedMotion && !isMobile}
+      drag={!prefersReducedMotion}
       dragConstraints={dragConstraints}
       dragMomentum={false}
       dragElastic={0.02}
@@ -137,6 +126,7 @@ export default function FloatingWindow({
         x,
         y,
         width: isMobile ? "100%" : windowWidth,
+        height: isMobile ? "auto" : windowHeight,
         zIndex,
       }}
     >
