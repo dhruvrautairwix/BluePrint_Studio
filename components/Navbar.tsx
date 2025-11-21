@@ -52,11 +52,8 @@ export default function PartisansBottomNav() {
                 className="object-contain h-16 w-16 sm:h-20 sm:w-20"
                 priority
               />
-              <span className="text-xl font-semibold tracking-[0.5em] sm:text-2xl">
-                Blueprint 3D Studios
-              </span>
             </Link>
-            <span className="hidden text-[0.55rem] tracking-[0.35em] sm:block">
+            <span className="hidden text-xs sm:text-sm tracking-[0.35em] sm:block">
               Building dreams, one pixel at a time.
             </span>
           </div>

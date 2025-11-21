@@ -20,16 +20,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={inter.variable}>
       <body className="bg-black text-white antialiased min-h-screen overflow-x-hidden">
-        <Preloader />
+        <Preloader>
+          {/* Prevents hydration mismatch */}
+          <SmoothScroll>
+            <Navbar />
 
-        {/* Prevents hydration mismatch */}
-        <SmoothScroll>
-          <Navbar />
-
-          <PageTransition>
-            <main className="min-h-screen w-full">{children}</main>
-          </PageTransition>
-        </SmoothScroll>
+            <PageTransition>
+              <main className="min-h-screen w-full">{children}</main>
+            </PageTransition>
+          </SmoothScroll>
+        </Preloader>
       </body>
     </html>
   );

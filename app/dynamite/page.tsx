@@ -120,10 +120,10 @@ export default function DynamitePage() {
       </div>
 
       {/* CONTENT */}
-      <div className="absolute inset-0 flex justify-start items-start px-4 pt-2 pb-10">
+      <div className="absolute inset-0 flex justify-start items-start">
         <div
           ref={scopeRef}
-          className="relative w-[95%] h-[95%] max-w-7xl max-h-[950px]"
+          className="relative w-full h-full"
           suppressHydrationWarning
         >
           {isMounted && (
