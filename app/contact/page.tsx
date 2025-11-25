@@ -28,8 +28,8 @@ export default function ContactPage() {
     },
     {
       id: "address",
-      title: "ADDRESS",
-      content: ["Mississauga, Ontario, Canada"],
+      title: "CONTACT FORM",
+      content: [""],
       initialPosition: { x: 850, y: 460 },
     },
   ]);

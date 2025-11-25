@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { motion, useReducedMotion, useMotionValue } from "framer-motion";
+import emailjs from "@emailjs/browser";
 
 interface ContactWindowProps {
   id: string;
@@ -98,6 +99,59 @@ export default function ContactWindow({
 
   const contentArray = Array.isArray(content) ? content : [content];
 
+  // Form state for address card
+  const [formData, setFormData] = useState({
+    name: "",
+    mobile: "",
+    email: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
+
+    try {
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_ac27qw7";
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_d4sl83b";
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "ZoWcaZVkUpQR-uXqF";
+
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.mobile,
+          message: formData.message,
+        },
+        publicKey
+      );
+
+      setSubmitStatus("success");
+      setFormData({ name: "", mobile: "", email: "", message: "" });
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+    } catch (error) {
+      console.error("EmailJS error:", error);
+      setSubmitStatus("error");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.85, y: 20 }}
@@ -117,7 +171,9 @@ export default function ContactWindow({
         zIndex,
         position: "absolute",
       }}
-      className="bg-black border-2 border-white overflow-hidden select-none cursor-move w-[500px] max-w-[90vw]"
+      className={`bg-black border-2 border-white overflow-hidden select-none cursor-move ${
+        id === "address" ? "w-[600px]" : "w-[500px]"
+      } max-w-[90vw]`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/20">
@@ -139,16 +195,125 @@ export default function ContactWindow({
 
       {/* Content */}
       <div className="px-10 py-8 bg-black">
-        <h2 className="text-[32px] md:text-[48px] lg:text-[64px] font-bold uppercase text-white leading-none mb-4">
-          {title}
-        </h2>
-        <div className="space-y-1">
-          {contentArray.map((line, i) => (
-            <p key={i} className="text-[16px] md:text-[18px] text-white/85 leading-tight">
-              {line}
-            </p>
-          ))}
-        </div>
+        {id === "address" ? (
+          // Contact Form
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-xs uppercase tracking-wider text-white/70 mb-2"
+              >
+                YOUR NAME*
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleFormChange}
+                required
+                className="w-full px-4 py-2 bg-white/10 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors"
+                placeholder=""
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="mobile"
+                className="block text-xs uppercase tracking-wider text-white/70 mb-2"
+              >
+                YOUR MOBILE*
+              </label>
+              <input
+                type="tel"
+                id="mobile"
+                name="mobile"
+                value={formData.mobile}
+                onChange={handleFormChange}
+                required
+                className="w-full px-4 py-2 bg-white/10 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors"
+                placeholder=""
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-xs uppercase tracking-wider text-white/70 mb-2"
+              >
+                EMAIL*
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleFormChange}
+                required
+                className="w-full px-4 py-2 bg-white/10 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors"
+                placeholder=""
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="message"
+                className="block text-xs uppercase tracking-wider text-white/70 mb-2"
+              >
+                YOUR MESSAGE*
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleFormChange}
+                required
+                rows={4}
+                className="w-full px-4 py-2 bg-white/10 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors resize-y"
+                placeholder=""
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-blue-900 hover:bg-blue-800 text-white uppercase tracking-wider py-3 px-6 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+            >
+              {isSubmitting ? (
+                "SENDING..."
+              ) : (
+                <>
+                  SEND QUESTIONS <span className="text-lg">&gt;</span>
+                </>
+              )}
+            </button>
+
+            {submitStatus === "success" && (
+              <p className="text-green-400 text-sm text-center mt-2">
+                Message sent successfully!
+              </p>
+            )}
+            {submitStatus === "error" && (
+              <p className="text-red-400 text-sm text-center mt-2">
+                Failed to send. Please try again.
+              </p>
+            )}
+          </form>
+        ) : (
+          // Regular content
+          <>
+            <h2 className="text-[32px] md:text-[48px] lg:text-[64px] font-bold uppercase text-white leading-none mb-4">
+              {title}
+            </h2>
+            <div className="space-y-1">
+              {contentArray.map((line, i) => (
+                <p key={i} className="text-[16px] md:text-[18px] text-white/85 leading-tight">
+                  {line}
+                </p>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </motion.div>
   );
