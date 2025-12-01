@@ -50,10 +50,20 @@ export default function FloatingWindow({
     const rect = dragScope.current.getBoundingClientRect();
     const margin = 20;
 
-    const maxX = Math.max(0, rect.width / 2 - windowWidth / 2 - margin);
-    const maxY = Math.max(0, rect.height / 2 - windowHeight / 2 - margin);
+    // Since the window is centered (50% left, 50% top with translate), 
+    // calculate symmetric constraints for equal spacing on both sides
+    // Window center starts at rect.width/2, rect.height/2
+    // To move left edge to margin: center at (windowWidth/2 + margin), translate by -(rect.width/2 - windowWidth/2 - margin)
+    // To move right edge to (rect.width - margin): center at (rect.width - windowWidth/2 - margin), translate by (rect.width/2 - windowWidth/2 - margin)
+    const maxOffsetX = rect.width / 2 - windowWidth / 2 - margin;
+    const maxOffsetY = rect.height / 2 - windowHeight / 2 - margin;
 
-    return { left: -maxX, right: maxX, top: -maxY, bottom: maxY };
+    return { 
+      left: -maxOffsetX, 
+      right: maxOffsetX, 
+      top: -maxOffsetY, 
+      bottom: maxOffsetY 
+    };
   };
 
   const clamp = (cx: number, cy: number) => {

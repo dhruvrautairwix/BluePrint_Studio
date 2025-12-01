@@ -120,7 +120,7 @@ export default function DynamitePage() {
       </div>
 
       {/* CONTENT */}
-      <div className="absolute inset-0 flex justify-start items-start">
+      <div className="absolute inset-0">
         <div
           ref={scopeRef}
           className="relative w-full h-full"

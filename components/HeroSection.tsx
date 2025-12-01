@@ -19,7 +19,6 @@ export default function HeroSection({
   backgroundImages,
   backgroundVideo,
 }: HeroSectionProps) {
-  // Use backgroundImages array if provided, otherwise use single backgroundImage
   const images = backgroundImages && backgroundImages.length > 0 
     ? backgroundImages 
     : backgroundImage 
@@ -33,7 +32,7 @@ export default function HeroSection({
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 2500); // Change every 2 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [images.length]);
@@ -64,7 +63,7 @@ export default function HeroSection({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1 }}
+                transition={{ duration: 2 }}
                 className="absolute inset-0 w-full h-full bg-cover bg-center"
                 style={{
                   backgroundImage: images[currentImageIndex]
@@ -119,4 +118,3 @@ export default function HeroSection({
     </section>
   );
 }
-

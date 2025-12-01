@@ -258,7 +258,7 @@ export const dynamiteItems: DynamiteItem[] = [
   },
   {
     id: "dyn-2",
-    title: "PARTISANS-FACTORY-1.JPG",
+    title: "FACTORY-1.JPG",
     subtitle: "Fabrication Lab",
     description: "Experimental prototypes and bespoke fabrication detailing from recent workshops.",
     mediaType: "image",

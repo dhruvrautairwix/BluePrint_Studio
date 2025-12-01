@@ -62,13 +62,14 @@ export default function ContactWindow({
       if (!dragScope.current) return { left: 0, right: 0, top: 0, bottom: 0 };
 
       const containerRect = dragScope.current.getBoundingClientRect();
-      const windowWidth = 550; // Approximate window width
+      // Use accurate window dimensions based on id
+      const windowWidth = id === "address" ? 500 : 400;
       const windowHeight = 400; // Approximate window height
 
-      // Constraints relative to initial position
-      const minX = 0 - initialPosition.x;
+      // Constraints relative to initial position - allow full movement within container
+      const minX = -initialPosition.x;
       const maxX = containerRect.width - windowWidth - initialPosition.x;
-      const minY = 0 - initialPosition.y;
+      const minY = -initialPosition.y;
       const maxY = containerRect.height - windowHeight - initialPosition.y;
 
       return {
@@ -203,10 +204,11 @@ export default function ContactWindow({
             e.stopPropagation();
             onClose(id);
           }}
-          className="h-5 w-5 flex items-center justify-center text-white hover:text-white/70 transition-colors text-xl leading-none"
+          className="h-5 w-5 flex items-center justify-center text-white hover:text-white/70 transition-colors text-xl leading-none font-bold"
           aria-label={`Close ${title}`}
           onPointerDown={(e) => e.stopPropagation()}
         >
+          ×
         </button>
       </div>
 

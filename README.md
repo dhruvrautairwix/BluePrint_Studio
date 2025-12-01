@@ -1,6 +1,6 @@
 # Architecture & Design Studio Website
 
-A modern, full-stack website for a creative architecture and design studio, inspired by partisans.com. Built with Next.js 14, TypeScript, Tailwind CSS, and Framer Motion.
+A modern, full-stack website for a creative architecture and design studio. Built with Next.js 14, TypeScript, Tailwind CSS, and Framer Motion.
 
 ## Features
 
@@ -220,6 +220,6 @@ This project is open source and available under the MIT License.
 
 ## Credits
 
-- Design inspired by [Partisans](https://partisans.com)
+- Modern design with smooth animations and transitions
 - Images from [Unsplash](https://unsplash.com)
 - Icons from [Lucide](https://lucide.dev)

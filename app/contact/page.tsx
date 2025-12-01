@@ -70,24 +70,27 @@ export default function ContactPage() {
         <div className="absolute inset-0 bg-black/40" />
       </div>
 
-      {/* Drag Container */}
-      <div
-        ref={containerRef}
-        className="relative w-full h-screen overflow-hidden"
-      >
-        {windows.map((window) => (
-          <ContactWindow
-            key={window.id}
-            id={window.id}
-            title={window.title}
-            content={window.content}
-            initialPosition={window.initialPosition}
-            onClose={handleClose}
-            onFocus={handleFocus}
-            zIndex={getZIndex(window.id)}
-            dragScope={containerRef}
-          />
-        ))}
+      {/* Bordered Section for Cards */}
+      <div className="relative w-full h-screen overflow-hidden">
+        {/* Drag Container */}
+        <div
+          ref={containerRef}
+          className="relative w-full h-full overflow-hidden"
+        >
+          {windows.map((window) => (
+            <ContactWindow
+              key={window.id}
+              id={window.id}
+              title={window.title}
+              content={window.content}
+              initialPosition={window.initialPosition}
+              onClose={handleClose}
+              onFocus={handleFocus}
+              zIndex={getZIndex(window.id)}
+              dragScope={containerRef}
+            />
+          ))}
+        </div>
       </div>
     </main>
   );
