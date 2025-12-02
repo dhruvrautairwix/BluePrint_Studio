@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
 import { projects } from "@/utils/data";
 
 export default function ProjectsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+
+  // Reset selected project when pathname changes (navigation)
+  useEffect(() => {
+    setSelectedProject(null);
+  }, [pathname]);
 
   // Ensure we always have at least 7 cards for layout structure
   const filled = [...projects];

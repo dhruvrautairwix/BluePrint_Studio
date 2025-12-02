@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SmoothScroll>
             <Navbar />
             <PageTransition>
-              <main className="min-h-screen w-full">{children}</main>
+              <main className="min-h-screen w-full relative">{children}</main>
             </PageTransition>
           </SmoothScroll>
         </Preloader>
