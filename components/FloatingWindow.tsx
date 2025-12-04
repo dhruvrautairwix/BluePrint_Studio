@@ -124,7 +124,7 @@ export default function FloatingWindow({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.02 }}
       transition={{ duration: 0.28 }}
-      drag={!prefersReducedMotion}
+      drag={!prefersReducedMotion && isFocused}
       dragConstraints={dragConstraints}
       dragMomentum={false}
       dragElastic={0.02}

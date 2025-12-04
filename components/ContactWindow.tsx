@@ -13,6 +13,7 @@ interface ContactWindowProps {
   onFocus: (id: string) => void;
   zIndex: number;
   dragScope: React.RefObject<HTMLDivElement>;
+  isFocused?: boolean;
 }
 
 export default function ContactWindow({
@@ -24,6 +25,7 @@ export default function ContactWindow({
   onFocus,
   zIndex,
   dragScope,
+  isFocused = false,
 }: ContactWindowProps) {
   const prefersReducedMotion = useReducedMotion();
   const [isMounted, setIsMounted] = useState(false);
@@ -175,9 +177,9 @@ export default function ContactWindow({
       initial={{ opacity: 0, scale: 0.85, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      drag={isMounted && !prefersReducedMotion}
+      drag={isMounted && !prefersReducedMotion && isFocused}
       dragConstraints={dragConstraints}
-      dragElastic={0.05}
+      dragElastic={0.02}
       dragMomentum={false}
       whileDrag={{ cursor: "grabbing" }}
       onPointerDown={() => onFocus(id)}
@@ -192,7 +194,7 @@ export default function ContactWindow({
       // Window width tweaks per card (address gets the larger form layout)
       className={`bg-black border-2 border-white overflow-hidden select-none cursor-move ${
         id === "address" ? "w-[500px]" : "w-[400px]"
-      } max-w-[90vw]`}
+      } max-w-[90vw] ${isFocused ? "ring-2 ring-white/60" : ""}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/20">

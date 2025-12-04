@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
@@ -10,11 +10,32 @@ export default function ProjectsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Reset selected project when pathname changes (navigation)
   useEffect(() => {
     setSelectedProject(null);
   }, [pathname]);
+
+
+  // Scroll detection for projects header background
+  useEffect(() => {
+    const handleScroll = () => {
+      // Support both regular scroll and Lenis smooth scroll
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop || window.pageYOffset;
+      setIsScrolled(scrollPosition > 50);
+    };
+
+    // Listen to both scroll events (for Lenis) and regular scroll
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("wheel", handleScroll, { passive: true });
+    handleScroll(); // Check initial scroll position
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("wheel", handleScroll);
+    };
+  }, []);
 
   // Ensure we always have at least 7 cards for layout structure
   const filled = [...projects];
@@ -57,7 +78,13 @@ export default function ProjectsPage() {
       <ProjectModal project={selectedProjectData} onClose={handleCloseModal} />
       
       {/* Projects Header Bar - Below desktop header bar */}
-      <div className={`fixed top-24 left-0 right-0 z-[65] bg-transparent border-y border-white hidden lg:block transition-opacity duration-300 ${selectedProject ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div 
+        className={`fixed top-[112px] left-0 right-0 z-[35] border-y border-white hidden lg:block transition-all duration-300 ${
+          selectedProject ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        } ${
+          isScrolled ? "bg-black" : "bg-transparent"
+        }`}
+      >
         <div className="max-w-[1800px] mx-auto px-8 xl:px-16">
           <div className="flex items-center justify-between py-2">
             <h2 className="text-white text-base font-semibold uppercase tracking-wider">

@@ -19,6 +19,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [localTime, setLocalTime] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -33,6 +34,25 @@ export default function Navbar() {
 
     const interval = window.setInterval(updateTime, 60_000);
     return () => window.clearInterval(interval);
+  }, []);
+
+  // Scroll detection for navbar background
+  useEffect(() => {
+    const handleScroll = () => {
+      // Support both regular scroll and Lenis smooth scroll
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop || window.pageYOffset;
+      setIsScrolled(scrollPosition > 50);
+    };
+
+    // Listen to both scroll events (for Lenis) and regular scroll
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("wheel", handleScroll, { passive: true });
+    handleScroll(); // Check initial scroll position
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("wheel", handleScroll);
+    };
   }, []);
 
   // Close mobile menu on route change
@@ -59,7 +79,9 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="hidden lg:block fixed inset-x-0 top-0 z-40 bg-transparent px-8 xl:px-16 py-6"
+        className={`hidden lg:block fixed inset-x-0 top-0 z-40 px-8 xl:px-16 py-6 transition-colors duration-300 ${
+          isScrolled ? "bg-black" : "bg-transparent"
+        }`}
       >
         <div className="mx-auto max-w-[1800px] flex items-center justify-between gap-8">
           {/* Left - Logo */}
@@ -99,7 +121,9 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="lg:hidden fixed inset-x-0 top-0 z-40 bg-transparent px-4 py-5 sm:px-8"
+        className={`lg:hidden fixed inset-x-0 top-0 z-40 px-4 py-5 sm:px-8 transition-colors duration-300 ${
+          isScrolled ? "bg-black" : "bg-transparent"
+        }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-center text-center">
           <div className="flex flex-col items-center gap-2.5">
@@ -124,13 +148,13 @@ export default function Navbar() {
       <div className="hidden lg:flex fixed bottom-8 left-16 z-50 items-center gap-10 xl:gap-12">
         <Link href="/" className="group flex flex-col items-center gap-2">
           <Home
-            className={`h-8 w-8 xl:h-9 xl:w-9 transition-all ${
+            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
               pathname === "/" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -140,14 +164,14 @@ export default function Navbar() {
 
         <Link href="/about" className="group flex flex-col items-center gap-2">
           <span
-            className={`text-2xl xl:text-3xl font-bold transition-all ${
+            className={`text-xl xl:text-2xl font-bold transition-all ${
               pathname === "/about" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
             B
           </span>
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/about" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -157,13 +181,13 @@ export default function Navbar() {
 
         <Link href="/projects" className="group flex flex-col items-center gap-2">
           <Globe
-            className={`h-8 w-8 xl:h-9 xl:w-9 transition-all ${
+            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
               pathname === "/projects" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/projects" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -173,13 +197,13 @@ export default function Navbar() {
 
         <Link href="/contact" className="group flex flex-col items-center gap-2">
           <Mail
-            className={`h-8 w-8 xl:h-9 xl:w-9 transition-all ${
+            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
               pathname === "/contact" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/contact" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -189,13 +213,13 @@ export default function Navbar() {
 
         <Link href="/dynamite" className="group flex flex-col items-center gap-2">
           <Bomb
-            className={`h-8 w-8 xl:h-9 xl:w-9 transition-all ${
+            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
               pathname === "/dynamite" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/dynamite" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -261,8 +285,8 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                       className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
                     >
-                      <Home className="h-20 w-20 text-white" strokeWidth={1.5} />
-                      <span className="text-lg font-bold tracking-[0.2em] uppercase text-white">
+                      <Home className="h-16 w-16 text-white" strokeWidth={1.5} />
+                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
                         Home
                       </span>
                     </Link>
@@ -280,8 +304,8 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                       className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
                     >
-                      <span className="text-7xl font-bold text-white">B</span>
-                      <span className="text-lg font-bold tracking-[0.2em] uppercase text-white">
+                      <span className="text-5xl font-bold text-white">B</span>
+                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
                         About
                       </span>
                     </Link>
@@ -299,8 +323,8 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                       className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
                     >
-                      <Globe className="h-20 w-20 text-white" strokeWidth={1.5} />
-                      <span className="text-lg font-bold tracking-[0.2em] uppercase text-white">
+                      <Globe className="h-16 w-16 text-white" strokeWidth={1.5} />
+                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
                         Projects
                       </span>
                     </Link>
@@ -318,8 +342,8 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                       className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
                     >
-                      <Mail className="h-20 w-20 text-white" strokeWidth={1.5} />
-                      <span className="text-lg font-bold tracking-[0.2em] uppercase text-white">
+                      <Mail className="h-16 w-16 text-white" strokeWidth={1.5} />
+                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
                         Contact
                       </span>
                     </Link>

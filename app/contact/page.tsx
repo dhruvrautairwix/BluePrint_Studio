@@ -39,8 +39,10 @@ export default function ContactPage() {
     "email",
     "address",
   ]);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
 
   const handleFocus = (id: string) => {
+    setFocusedId(id);
     setZIndexOrder((prev) => {
       const newOrder = prev.filter((item) => item !== id);
       return [...newOrder, id];
@@ -57,7 +59,7 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 -z-10 h-full w-full">
         <Image
@@ -88,11 +90,12 @@ export default function ContactPage() {
               onFocus={handleFocus}
               zIndex={getZIndex(window.id)}
               dragScope={containerRef}
+              isFocused={focusedId === window.id}
             />
           ))}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

@@ -59,13 +59,22 @@ const windowBlueprint = [
 export default function AboutPage() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [activeCard, setActiveCard] = useState<string | null>(null);
+  const [zIndexCounter, setZIndexCounter] = useState(10);
 
   useEffect(() => {
+    setIsMounted(true);
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const handleCardFocus = (cardId: string) => {
+    setActiveCard(cardId);
+    setZIndexCounter(prev => prev + 1);
+  };
 
   return (
     <div className="relative min-h-screen h-screen w-full overflow-hidden bg-black text-white">
@@ -82,19 +91,26 @@ export default function AboutPage() {
 
       <div className="relative flex min-h-screen flex-col">
 
-        <main
+        <div
           ref={canvasRef}
           className="relative flex-1 px-4 pb-24 pt-6 md:px-12 md:pt-0"
         >
           <div className="absolute inset-0" />
           <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col md:block">
-            {windowBlueprint.map((win) => (
+            {windowBlueprint.map((win) => {
+              const isActive = activeCard === win.id;
+              const cardZIndex = isActive ? zIndexCounter : 10;
+              // Only apply mobile styles after mount to prevent hydration mismatch
+              const shouldUseMobileStyles = isMounted && isMobile;
+              
+              return (
               <motion.div
                 key={win.id}
-                drag={!isMobile}
+                drag={isMounted && !isMobile && isActive}
                 dragConstraints={canvasRef}
-                dragElastic={0.04}
+                dragElastic={0.02}
                 dragMomentum={false}
+                onPointerDown={() => handleCardFocus(win.id)}
                 initial={{
                   opacity: 0,
                   scale: 0.94,
@@ -102,16 +118,21 @@ export default function AboutPage() {
                 }}
                 animate={{
                   opacity: 1,
-                  scale: 1,
+                  scale: isActive ? 1.05 : 1,
                   y: 0
                 }}
-                className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm ${
-                  isMobile ? "relative w-full" : "md:absolute"
-                }`}
+                transition={{
+                  scale: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
+                }}
+                whileHover={isMounted && !isMobile ? { scale: isActive ? 1.05 : 1.02 } : {}}
+                className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm cursor-move transition-shadow select-none ${
+                  shouldUseMobileStyles ? "relative w-full" : "md:absolute"
+                } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60" : ""}`}
                 style={{
-                  width: isMobile ? "100%" : win.width,
-                  height: isMobile ? "auto" : win.height,
-                  ...(isMobile ? {} : { top: win.position.top, left: win.position.left })
+                  width: shouldUseMobileStyles ? "100%" : win.width,
+                  height: shouldUseMobileStyles ? "auto" : win.height,
+                  ...(shouldUseMobileStyles ? {} : { top: win.position.top, left: win.position.left }),
+                  zIndex: cardZIndex
                 }}
               >
                 <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0">
@@ -126,9 +147,10 @@ export default function AboutPage() {
                   {win.render()}
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );
