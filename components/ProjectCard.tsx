@@ -31,20 +31,6 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
   const overlayLayoutId = prefersReducedMotion ? undefined : `project-overlay-${project.slug}`;
   const titleLayoutId = prefersReducedMotion ? undefined : `project-title-${project.slug}`;
 
-  const hoverMotion = prefersReducedMotion
-    ? undefined
-    : {
-        scale: 1.03,
-        y: -3,
-        transition: { duration: 0.18, ease: "easeOut" },
-      };
-
-  const imageHoverMotion = prefersReducedMotion
-    ? undefined
-    : {
-        scale: 1.06,
-        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-      };
 
   const handleSelect = () => onSelect(project.slug);
 
@@ -78,8 +64,6 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
           <motion.a
             layoutId={cardLayoutId}
             className={`block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black ${noAspect ? 'h-full flex flex-col' : ''}`}
-            whileHover={hoverMotion}
-            whileFocus={hoverMotion}
             onPointerDown={handlePointerDown}
             onKeyDown={handleKeyDown}
           >
@@ -87,7 +71,6 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
             <motion.div
               layoutId={mediaLayoutId}
               className="relative w-full h-full"
-              whileHover={imageHoverMotion}
             >
               <Image
                 src={project.coverImage}
@@ -105,7 +88,7 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
                 transition: { duration: 0.25, ease: "easeOut" },
               }}
             />
-            <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 group-focus-within:translate-y-0 transition-transform duration-300 ease-out">
+            <div className="absolute bottom-0 left-0 right-0 p-6">
               <motion.h3
                 layoutId={titleLayoutId}
                 className="text-white text-xl font-bold"
