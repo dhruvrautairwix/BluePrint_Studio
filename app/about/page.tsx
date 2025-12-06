@@ -75,7 +75,9 @@ export default function AboutPage() {
 
   // Calculate drag constraints for full screen movement using actual element dimensions
   const getDragConstraints = (cardId: string, initialTop: number, initialLeft: number) => {
-    if (typeof window === "undefined" || isMobile) return false;
+    if (typeof window === "undefined" || isMobile) {
+      return { left: 0, right: 0, top: 0, bottom: 0 };
+    }
     
     const cardElement = cardRefs.current[cardId];
     let cardWidth = windowBlueprint.find(w => w.id === cardId)?.width || 520;
@@ -199,8 +201,8 @@ export default function AboutPage() {
                 ref={(el) => {
                   if (el) cardRefs.current[win.id] = el;
                 }}
-                drag={isMounted && !isMobile && isActive}
-                dragConstraints={dragConstraints[win.id] || getDragConstraints(win.id, win.position.top, win.position.left)}
+                drag={isMounted && !isMobile}
+                dragConstraints={dragConstraints[win.id] ?? getDragConstraints(win.id, win.position.top, win.position.left)}
                 dragElastic={0.1}
                 dragMomentum={false}
                 onDragStart={() => handleCardFocus(win.id)}
