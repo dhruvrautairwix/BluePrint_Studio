@@ -92,16 +92,22 @@ export default function AboutPage() {
     const margin = 20; // Equal margin on all sides
     const bottomMargin = 0; // No margin at bottom - allow cards to reach the very bottom
     
-    // Calculate equal padding on left and right
-    // Find the maximum distance the card can move while maintaining equal padding
-    const maxLeftMovement = initialLeft - margin; // How far left from initial position
-    const maxRightMovement = (window.innerWidth - cardWidth - initialLeft) - margin; // How far right from initial position
-    const equalPadding = Math.min(maxLeftMovement, maxRightMovement); // Use the smaller value for equal padding
+    // Calculate the original movement range
+    const originalLeftConstraint = -initialLeft + margin;
+    const originalRightConstraint = window.innerWidth - cardWidth - initialLeft - margin;
+    const originalRange = originalRightConstraint - originalLeftConstraint;
     
-    // Constraints relative to initial position with equal left/right padding
+    // Calculate equal padding: find the center point and create symmetric constraints
+    // The center of the movement range
+    const centerPoint = (originalLeftConstraint + originalRightConstraint) / 2;
+    
+    // Create symmetric constraints around the center point with equal padding
+    const symmetricRange = originalRange / 2;
+    
+    // Constraints relative to initial position - symmetric with equal padding
     return {
-      left: -equalPadding,
-      right: equalPadding,
+      left: centerPoint - symmetricRange,
+      right: centerPoint + symmetricRange,
       top: -initialTop + margin,
       bottom: window.innerHeight - cardHeight - initialTop - bottomMargin,
     };
@@ -132,14 +138,18 @@ export default function AboutPage() {
             const margin = 20;
             const bottomMargin = 0;
             
-            // Calculate equal padding on left and right
-            const maxLeftMovement = win.position.left - margin;
-            const maxRightMovement = (window.innerWidth - cardWidth - win.position.left) - margin;
-            const equalPadding = Math.min(maxLeftMovement, maxRightMovement);
+            // Calculate the original movement range
+            const originalLeftConstraint = -win.position.left + margin;
+            const originalRightConstraint = window.innerWidth - cardWidth - win.position.left - margin;
+            const originalRange = originalRightConstraint - originalLeftConstraint;
+            
+            // Calculate equal padding: find the center point and create symmetric constraints
+            const centerPoint = (originalLeftConstraint + originalRightConstraint) / 2;
+            const symmetricRange = originalRange / 2;
             
             const constraints = {
-              left: -equalPadding,
-              right: equalPadding,
+              left: centerPoint - symmetricRange,
+              right: centerPoint + symmetricRange,
               top: -win.position.top + margin,
               bottom: window.innerHeight - cardHeight - win.position.top - bottomMargin,
             };
@@ -153,14 +163,18 @@ export default function AboutPage() {
             const margin = 20;
             const bottomMargin = 0;
             
-            // Calculate equal padding on left and right
-            const maxLeftMovement = win.position.left - margin;
-            const maxRightMovement = (window.innerWidth - win.width - win.position.left) - margin;
-            const equalPadding = Math.min(maxLeftMovement, maxRightMovement);
+            // Calculate the original movement range
+            const originalLeftConstraint = -win.position.left + margin;
+            const originalRightConstraint = window.innerWidth - win.width - win.position.left - margin;
+            const originalRange = originalRightConstraint - originalLeftConstraint;
+            
+            // Calculate equal padding: find the center point and create symmetric constraints
+            const centerPoint = (originalLeftConstraint + originalRightConstraint) / 2;
+            const symmetricRange = originalRange / 2;
             
             const constraints = {
-              left: -equalPadding,
-              right: equalPadding,
+              left: centerPoint - symmetricRange,
+              right: centerPoint + symmetricRange,
               top: -win.position.top + margin,
               bottom: window.innerHeight - win.height - win.position.top - bottomMargin,
             };
