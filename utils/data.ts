@@ -85,6 +85,12 @@ export const projects: Project[] = [
     coverImage: "/images/astron-legal-boardroom.jpg",
     images: [
       "/images/astron-legal-boardroom.jpg",
+      "/images/astron-legal-boardroom (1).jpg",
+      "/images/astron-legal-reception-1.jpg",
+      "/images/astron-legal-reception-2.jpg",
+      "/images/astron-legal-executive-cabin-1.jpg",
+      "/images/astron-legal-executive-cabin-2.jpg",
+      "/images/astron-legal-cabin.jpg",
     ],
     slug: "law-office-interior",
   },
