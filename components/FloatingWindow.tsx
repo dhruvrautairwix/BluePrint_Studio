@@ -36,17 +36,18 @@ export default function FloatingWindow({
   const x = useMotionValue(initialPosition?.x ?? 0);
   const y = useMotionValue(initialPosition?.y ?? 0);
 
+  // Initialize with large constraints to allow movement until actual constraints are calculated
   const [dragConstraints, setDragConstraints] = useState({
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    left: -10000,
+    right: 10000,
+    top: -10000,
+    bottom: 10000,
   });
 
   // Constraint calculation
   const calculateConstraints = () => {
     if (typeof window === "undefined")
-      return { left: 0, right: 0, top: 0, bottom: 0 };
+      return { left: -10000, right: 10000, top: -10000, bottom: 10000 };
 
     const margin = 0; // No margin to allow full movement to edges
 
@@ -69,12 +70,15 @@ export default function FloatingWindow({
     const maxOffsetX = window.innerWidth / 2 - actualWidth / 2 - margin;
     const maxOffsetY = window.innerHeight / 2 - actualHeight / 2 - margin;
 
-    return { 
-      left: -maxOffsetX, 
-      right: maxOffsetX, 
-      top: -maxOffsetY, 
-      bottom: maxOffsetY 
+    // Ensure constraints are valid (not NaN or Infinity) and allow full movement
+    const constraints = { 
+      left: isFinite(-maxOffsetX) ? -maxOffsetX : -10000, 
+      right: isFinite(maxOffsetX) ? maxOffsetX : 10000, 
+      top: isFinite(-maxOffsetY) ? -maxOffsetY : -10000, 
+      bottom: isFinite(maxOffsetY) ? maxOffsetY : 10000 
     };
+
+    return constraints;
   };
 
   const clamp = (cx: number, cy: number) => {
@@ -90,16 +94,19 @@ export default function FloatingWindow({
   useEffect(() => {
     if (!initialPosition) return;
 
-    const update = () => {
-      if (!dragScope.current) {
-        requestAnimationFrame(update);
+    const update = (attempts = 0) => {
+      if (!windowRef.current && attempts < 10) {
+        requestAnimationFrame(() => update(attempts + 1));
         return;
       }
+
+      if (!windowRef.current) return;
 
       // Use multiple requestAnimationFrame to ensure element is measured
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const c = calculateConstraints();
+          // Always set constraints
           setDragConstraints(c);
 
           const baseX = initialPosition.x ?? 0;
@@ -117,25 +124,25 @@ export default function FloatingWindow({
 
   // Re-clamp on viewport resize and when card becomes focused
   useEffect(() => {
-    const onResize = () => {
-      requestAnimationFrame(() => {
-        const c = calculateConstraints();
-        setDragConstraints(c);
-
-        const fixed = clamp(x.get(), y.get());
-        x.set(fixed.x);
-        y.set(fixed.y);
-      });
-    };
-
-    // Recalculate constraints when card becomes focused
-    if (isFocused && windowRef.current) {
+    const updateConstraints = () => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const c = calculateConstraints();
           setDragConstraints(c);
         });
       });
+    };
+
+    const onResize = () => {
+      updateConstraints();
+      const fixed = clamp(x.get(), y.get());
+      x.set(fixed.x);
+      y.set(fixed.y);
+    };
+
+    // Recalculate constraints on mount and when card becomes focused
+    if (windowRef.current) {
+      updateConstraints();
     }
 
     window.addEventListener("resize", onResize);
@@ -153,10 +160,11 @@ export default function FloatingWindow({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.02 }}
       transition={{ duration: 0.28 }}
-      drag={!prefersReducedMotion && isFocused}
+      drag={!prefersReducedMotion}
       dragConstraints={dragConstraints}
       dragMomentum={false}
-      dragElastic={0.02}
+      dragElastic={0.1}
+      onDragStart={() => onFocus(item.id)}
       onPointerDown={() => onFocus(item.id)}
       className={`${containerClass} ${isFocused ? "ring-2 ring-white/60" : ""
         }`}
