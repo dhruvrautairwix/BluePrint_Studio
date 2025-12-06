@@ -64,33 +64,23 @@ export default function ContactWindow({
     const calculateConstraints = () => {
       if (typeof window === "undefined") return { left: 0, right: 0, top: 0, bottom: 0 };
 
-      // Get actual window dimensions from the DOM element - don't use fallback
+      // Get actual window dimensions from the DOM element
       const windowWidth = id === "address" ? 500 : 400;
-      let windowHeight = 0;
+      let windowHeight = 400; // Default fallback
       
-      // Always use actual element dimensions - wait for it if needed
-      if (!windowRef.current) {
-        // If element not ready, return zero constraints (will recalculate when ready)
-        return { left: 0, right: 0, top: 0, bottom: 0 };
-      }
-
-      const rect = windowRef.current.getBoundingClientRect();
-      windowHeight = rect.height;
-
-      // Only calculate if we have a valid height
-      if (windowHeight === 0) {
-        return { left: 0, right: 0, top: 0, bottom: 0 };
+      if (windowRef.current) {
+        const rect = windowRef.current.getBoundingClientRect();
+        windowHeight = rect.height;
       }
 
       const margin = 20; // Reduced margin to allow more movement
-      const bottomMargin = 0; // No margin at bottom - allow cards to reach the very bottom
+      const bottomMargin = 10; // Even smaller margin for bottom to allow more downward movement
 
       // Constraints relative to initial position - allow full movement across entire screen
       // Calculate how far the window can move from its initial position
       const minX = -initialPosition.x + margin;
       const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
       const minY = -initialPosition.y + margin;
-      // Allow cards to move all the way to the bottom of the screen
       const maxY = window.innerHeight - windowHeight - initialPosition.y - bottomMargin;
 
       return {
@@ -102,46 +92,21 @@ export default function ContactWindow({
     };
 
     const updateConstraints = () => {
-      const newConstraints = calculateConstraints();
-      // Only update if we got valid constraints (non-zero)
-      if (newConstraints.bottom !== 0 || newConstraints.top !== 0) {
-        setDragConstraints(newConstraints);
-      }
+      setDragConstraints(calculateConstraints());
     };
 
     // Use multiple requestAnimationFrame calls to ensure DOM is fully rendered
-    // Also retry if element not ready yet
-    const tryUpdateConstraints = (attempts = 0) => {
-      if (windowRef.current) {
-        const rect = windowRef.current.getBoundingClientRect();
-        if (rect.height > 0) {
-          updateConstraints();
-        } else if (attempts < 10) {
-          // Retry if height is still 0
-          requestAnimationFrame(() => tryUpdateConstraints(attempts + 1));
-        }
-      } else if (attempts < 10) {
-        // Retry if ref not set yet
-        requestAnimationFrame(() => tryUpdateConstraints(attempts + 1));
-      }
-    };
-
     const timeoutId = setTimeout(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          tryUpdateConstraints();
+          updateConstraints();
         });
       });
     }, 100);
 
     const handleResize = () => {
       requestAnimationFrame(() => {
-        if (windowRef.current) {
-          const rect = windowRef.current.getBoundingClientRect();
-          if (rect.height > 0) {
-            updateConstraints();
-          }
-        }
+        setDragConstraints(calculateConstraints());
       });
     };
 
@@ -154,41 +119,30 @@ export default function ContactWindow({
 
   // Recalculate constraints when card becomes focused
   useEffect(() => {
-    if (isFocused && isMounted) {
-      // Use multiple requestAnimationFrame to ensure DOM is fully updated
-      const recalculate = (attempts = 0) => {
-        if (!windowRef.current) {
-          if (attempts < 10) {
-            requestAnimationFrame(() => recalculate(attempts + 1));
-          }
-          return;
-        }
-
-        const rect = windowRef.current.getBoundingClientRect();
-        if (rect.height === 0 && attempts < 10) {
-          requestAnimationFrame(() => recalculate(attempts + 1));
-          return;
-        }
-
-        const windowWidth = id === "address" ? 500 : 400;
-        const windowHeight = rect.height;
-        
-        if (windowHeight === 0) return;
-
-        const margin = 20;
-        const bottomMargin = 0;
-        const minX = -initialPosition.x + margin;
-        const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
-        const minY = -initialPosition.y + margin;
-        const maxY = window.innerHeight - windowHeight - initialPosition.y - bottomMargin;
-
-        setDragConstraints({ left: minX, right: maxX, top: minY, bottom: maxY });
-      };
-
+    if (isFocused && isMounted && windowRef.current) {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          recalculate();
-        });
+        const calculateConstraints = () => {
+          if (typeof window === "undefined") return { left: 0, right: 0, top: 0, bottom: 0 };
+
+          const windowWidth = id === "address" ? 500 : 400;
+          let windowHeight = 400;
+          
+          if (windowRef.current) {
+            const rect = windowRef.current.getBoundingClientRect();
+            windowHeight = rect.height;
+          }
+
+          const margin = 20; // Reduced margin to allow more movement
+          const bottomMargin = 10; // Even smaller margin for bottom to allow more downward movement
+          const minX = -initialPosition.x + margin;
+          const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
+          const minY = -initialPosition.y + margin;
+          const maxY = window.innerHeight - windowHeight - initialPosition.y - bottomMargin;
+
+          return { left: minX, right: maxX, top: minY, bottom: maxY };
+        };
+        
+        setDragConstraints(calculateConstraints());
       });
     }
   }, [isFocused, isMounted, initialPosition, id]);
