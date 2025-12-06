@@ -89,13 +89,19 @@ export default function AboutPage() {
       if (rect.height > 0) cardHeight = rect.height;
     }
     
-    const margin = 20; // Reduced margin to allow more movement
+    const margin = 20; // Equal margin on all sides
     const bottomMargin = 0; // No margin at bottom - allow cards to reach the very bottom
     
-    // Constraints relative to initial position
+    // Calculate equal padding on left and right
+    // Find the maximum distance the card can move while maintaining equal padding
+    const maxLeftMovement = initialLeft - margin; // How far left from initial position
+    const maxRightMovement = (window.innerWidth - cardWidth - initialLeft) - margin; // How far right from initial position
+    const equalPadding = Math.min(maxLeftMovement, maxRightMovement); // Use the smaller value for equal padding
+    
+    // Constraints relative to initial position with equal left/right padding
     return {
-      left: -initialLeft + margin,
-      right: window.innerWidth - cardWidth - initialLeft - margin,
+      left: -equalPadding,
+      right: equalPadding,
       top: -initialTop + margin,
       bottom: window.innerHeight - cardHeight - initialTop - bottomMargin,
     };
@@ -126,9 +132,14 @@ export default function AboutPage() {
             const margin = 20;
             const bottomMargin = 0;
             
+            // Calculate equal padding on left and right
+            const maxLeftMovement = win.position.left - margin;
+            const maxRightMovement = (window.innerWidth - cardWidth - win.position.left) - margin;
+            const equalPadding = Math.min(maxLeftMovement, maxRightMovement);
+            
             const constraints = {
-              left: -win.position.left + margin,
-              right: window.innerWidth - cardWidth - win.position.left - margin,
+              left: -equalPadding,
+              right: equalPadding,
               top: -win.position.top + margin,
               bottom: window.innerHeight - cardHeight - win.position.top - bottomMargin,
             };
@@ -141,9 +152,15 @@ export default function AboutPage() {
             // If element not ready, set initial constraints based on blueprint
             const margin = 20;
             const bottomMargin = 0;
+            
+            // Calculate equal padding on left and right
+            const maxLeftMovement = win.position.left - margin;
+            const maxRightMovement = (window.innerWidth - win.width - win.position.left) - margin;
+            const equalPadding = Math.min(maxLeftMovement, maxRightMovement);
+            
             const constraints = {
-              left: -win.position.left + margin,
-              right: window.innerWidth - win.width - win.position.left - margin,
+              left: -equalPadding,
+              right: equalPadding,
               top: -win.position.top + margin,
               bottom: window.innerHeight - win.height - win.position.top - bottomMargin,
             };
