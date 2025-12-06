@@ -2,7 +2,7 @@
 
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import AnimatedText from "@/components/AnimatedText";
 import { projects } from "@/utils/data";
 import { use } from "react";
@@ -31,9 +31,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll();
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0.6]);
   const cardLayoutId = prefersReducedMotion ? undefined : `project-card-${project.slug}`;
   const mediaLayoutId = prefersReducedMotion ? undefined : `project-media-${project.slug}`;
   const overlayLayoutId = prefersReducedMotion ? undefined : `project-overlay-${project.slug}`;
@@ -45,7 +42,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       <motion.div
         layoutId={cardLayoutId}
         className="relative h-[60vh] md:h-[70vh] overflow-hidden"
-        style={prefersReducedMotion ? undefined : { scale: heroScale, opacity: heroOpacity }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.div layoutId={mediaLayoutId} className="relative w-full h-full">
