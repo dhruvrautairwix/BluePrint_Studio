@@ -17,7 +17,10 @@ const windowBlueprint = [
     height: 520,
     position: { top: 60, left: 80 },
     render: () => (
-      <div className="relative h-full w-full flex-shrink-0">
+      <div 
+        className="relative h-full w-full flex-shrink-0"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <Image
           src="https://images.unsplash.com/photo-1503386435953-66943ba0e08f?auto=format&fit=crop&w=1400&q=80"
           alt="Studio portrait"
@@ -44,7 +47,11 @@ const windowBlueprint = [
             BLUEPRINT 3D STUDIOS
           </p>
         </div>
-        <div className="flex-1 overflow-y-auto px-6 pb-8 text-lg leading-8 text-zinc-200">
+        <div 
+          data-scrollable
+          className="flex-1 overflow-y-auto px-6 pb-8 text-lg leading-8 text-zinc-200"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {manifestoCopy.map((paragraph) => (
             <p key={paragraph} className="mb-6 last:mb-0">
               {paragraph}
@@ -62,6 +69,7 @@ export default function AboutPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [activeCard, setActiveCard] = useState<string | null>(null);
   const [zIndexCounter, setZIndexCounter] = useState(10);
+  const [closedWindows, setClosedWindows] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setIsMounted(true);
@@ -74,6 +82,14 @@ export default function AboutPage() {
   const handleCardFocus = (cardId: string) => {
     setActiveCard(cardId);
     setZIndexCounter(prev => prev + 1);
+  };
+
+  const handleCloseWindow = (windowId: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent dragging when clicking close
+    setClosedWindows(prev => new Set(prev).add(windowId));
+    if (activeCard === windowId) {
+      setActiveCard(null);
+    }
   };
 
   return (
@@ -100,17 +116,27 @@ export default function AboutPage() {
             {windowBlueprint.map((win) => {
               const isActive = activeCard === win.id;
               const cardZIndex = isActive ? zIndexCounter : 10;
+              const isClosed = closedWindows.has(win.id);
               // Only apply mobile styles after mount to prevent hydration mismatch
               const shouldUseMobileStyles = isMounted && isMobile;
+              
+              // Don't render closed windows
+              if (isClosed) return null;
               
               return (
               <motion.div
                 key={win.id}
-                drag={isMounted && !isMobile && isActive}
+                drag={false}
                 dragConstraints={canvasRef}
                 dragElastic={0.02}
                 dragMomentum={false}
-                onPointerDown={() => handleCardFocus(win.id)}
+                onPointerDown={(e) => {
+                  // Only focus if not clicking on close button or scrollable content
+                  const target = e.target as HTMLElement;
+                  if (!target.closest('button') && !target.closest('[data-scrollable]')) {
+                    handleCardFocus(win.id);
+                  }
+                }}
                 initial={{
                   opacity: 0,
                   scale: 0.94,
@@ -125,7 +151,7 @@ export default function AboutPage() {
                   scale: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
                 }}
                 whileHover={isMounted && !isMobile ? { scale: isActive ? 1.05 : 1.02 } : {}}
-                className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm cursor-move transition-shadow select-none ${
+                className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm transition-shadow select-none ${
                   shouldUseMobileStyles ? "relative w-full" : "md:absolute"
                 } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60" : ""}`}
                 style={{
@@ -135,14 +161,27 @@ export default function AboutPage() {
                   zIndex: cardZIndex
                 }}
               >
-                <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0">
+                <motion.div 
+                  drag={isMounted && !isMobile && isActive}
+                  dragConstraints={canvasRef}
+                  dragElastic={0.02}
+                  dragMomentum={false}
+                  onDragStart={() => handleCardFocus(win.id)}
+                  className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0 cursor-move"
+                >
                   <span>{win.title}</span>
                   <div className="flex items-center gap-1">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-base leading-none">
+                    <button
+                      onClick={(e) => handleCloseWindow(win.id, e)}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onDragStart={(e) => e.preventDefault()}
+                      className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-base leading-none hover:bg-white/10 hover:border-white/40 transition-colors cursor-pointer"
+                      aria-label="Close window"
+                    >
                       ×
-                    </span>
+                    </button>
                   </div>
-                </div>
+                </motion.div>
                 <div className="flex-1 min-h-0">
                   {win.render()}
                 </div>

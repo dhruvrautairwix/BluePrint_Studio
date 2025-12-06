@@ -48,7 +48,7 @@ export default function FloatingWindow({
       return { left: 0, right: 0, top: 0, bottom: 0 };
 
     const rect = dragScope.current.getBoundingClientRect();
-    const margin = 20;
+    const margin = 10; // Reduced margin to allow more movement
 
     // Since the window is centered (50% left, 50% top with translate), 
     // calculate symmetric constraints for equal spacing on both sides

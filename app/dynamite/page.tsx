@@ -21,14 +21,18 @@ export default function DynamitePage() {
     if (!scopeRef.current || isMobile) return { x: 0, y: 0 };
 
     const rect = scopeRef.current.getBoundingClientRect();
-    const margin = 20;
+    const margin = 10; // Reduced margin to allow more movement
 
-    const maxX = rect.width / 2 - width / 2 - margin;
-    const maxY = rect.height / 2 - height / 2 - margin;
+    // Allow full width movement: from left edge (margin) to right edge (width - margin - windowWidth)
+    // Since window is centered at 50%, we need to calculate offsets from center
+    // Left edge: window center at (width/2 + margin), translate by -(rect.width/2 - width/2 - margin)
+    // Right edge: window center at (rect.width - width/2 - margin), translate by (rect.width/2 - width/2 - margin)
+    const maxOffsetX = rect.width / 2 - width / 2 - margin;
+    const maxOffsetY = rect.height / 2 - height / 2 - margin;
 
     return {
-      x: Math.max(-maxX, Math.min(maxX, x)),
-      y: Math.max(-maxY, Math.min(maxY, y)),
+      x: Math.max(-maxOffsetX, Math.min(maxOffsetX, x)),
+      y: Math.max(-maxOffsetY, Math.min(maxOffsetY, y)),
     };
   };
 
@@ -106,9 +110,9 @@ export default function DynamitePage() {
   };
 
   return (
-    <div className="relative min-h-screen h-screen text-white">
+    <div className="relative min-h-screen h-screen text-white" style={{ backgroundColor: 'transparent' }}>
       {/* BACKGROUND */}
-      <div className="absolute inset-0 -z-10 h-full w-full">
+      <div className="absolute inset-0 z-[1] h-full w-full">
         <Image
           src="/images/urban-bistro-mississauga-dining-2.png"
           alt=""
@@ -116,14 +120,13 @@ export default function DynamitePage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/60" />
       </div>
 
       {/* CONTENT */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-[2] overflow-visible">
         <div
           ref={scopeRef}
-          className="relative w-full h-full"
+          className="relative w-full h-full overflow-visible"
           suppressHydrationWarning
         >
           {isMounted && (

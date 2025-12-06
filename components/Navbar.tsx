@@ -18,15 +18,17 @@ const mobileNavLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [localTime, setLocalTime] = useState("");
+  const [temperature, setTemperature] = useState<string>("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Update time to show user's local time
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("en-CA", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-      timeZone: "America/Toronto",
+      // No timeZone specified - uses user's local timezone
     });
 
     const updateTime = () => setLocalTime(formatter.format(new Date()));
@@ -34,6 +36,37 @@ export default function Navbar() {
 
     const interval = window.setInterval(updateTime, 60_000);
     return () => window.clearInterval(interval);
+  }, []);
+
+  // Fetch temperature for Mississauga
+  useEffect(() => {
+    const fetchTemperature = async () => {
+      try {
+        // Using OpenWeatherMap API (free tier)
+        // You'll need to get an API key from https://openweathermap.org/api
+        // For now, using a free alternative: Open-Meteo API (no API key required)
+        const response = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=43.5890&longitude=-79.6441&current=temperature_2m&timezone=America/Toronto"
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const temp = data.current?.temperature_2m;
+          if (temp !== undefined) {
+            setTemperature(Math.round(temp).toString());
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch temperature:", error);
+        // Fallback to empty string if API fails
+        setTemperature("");
+      }
+    };
+
+    fetchTemperature();
+    // Refresh temperature every 10 minutes
+    const interval = setInterval(fetchTemperature, 600000);
+    return () => clearInterval(interval);
   }, []);
 
   // Scroll detection for navbar background
@@ -110,8 +143,12 @@ export default function Navbar() {
             <span>MISSISSAUGA</span>
             <span>|</span>
             <span>ONTARIO</span>
-            <span>|</span>
-            <span>35.8</span>
+            {temperature && (
+              <>
+                <span>|</span>
+                <span>{temperature}°C</span>
+              </>
+            )}
           </div>
         </div>
       </motion.div>
@@ -145,16 +182,16 @@ export default function Navbar() {
       </motion.div>
 
       {/* Desktop Navigation - Bottom Left */}
-      <div className="hidden lg:flex fixed bottom-8 left-16 z-50 items-center gap-10 xl:gap-12">
-        <Link href="/" className="group flex flex-col items-center gap-2">
+      <div className="hidden lg:flex fixed bottom-8 left-16 z-50 items-center gap-8 xl:gap-10">
+        <Link href="/" className="group flex flex-col items-center gap-1.5">
           <Home
-            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
+            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
               pathname === "/" ? "text-white" : "text-white/70 group-hover:text-white"
-            }`}
+            }`} 
             strokeWidth={1.5}
           />
           <span
-            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -162,16 +199,16 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/about" className="group flex flex-col items-center gap-2">
+        <Link href="/about" className="group flex flex-col items-center gap-1.5">
           <span
-            className={`text-xl xl:text-2xl font-bold transition-all ${
+            className={`text-2xl xl:text-3xl font-bold transition-all ${
               pathname === "/about" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
             B
           </span>
           <span
-            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/about" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -179,15 +216,15 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/projects" className="group flex flex-col items-center gap-2">
+        <Link href="/projects" className="group flex flex-col items-center gap-1.5">
           <Globe
-            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
+            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
               pathname === "/projects" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/projects" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -195,15 +232,15 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/contact" className="group flex flex-col items-center gap-2">
+        <Link href="/contact" className="group flex flex-col items-center gap-1.5">
           <Mail
-            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
+            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
               pathname === "/contact" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/contact" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -211,15 +248,15 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/dynamite" className="group flex flex-col items-center gap-2">
+        <Link href="/dynamite" className="group flex flex-col items-center gap-1.5">
           <Bomb
-            className={`h-6 w-6 xl:h-7 xl:w-7 transition-all ${
+            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
               pathname === "/dynamite" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/dynamite" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -236,12 +273,12 @@ export default function Navbar() {
           aria-label="Toggle menu"
         >
           {mobileMenuOpen ? (
-            <X className="h-7 w-7" strokeWidth={2.5} />
+            <X className="h-6 w-6" strokeWidth={2.5} />
           ) : (
-            <div className="flex flex-col gap-[6px]">
-              <div className="w-10 h-[3px] bg-white rounded-sm"></div>
-              <div className="w-10 h-[3px] bg-white rounded-sm"></div>
-              <div className="w-10 h-[3px] bg-white rounded-sm"></div>
+            <div className="flex flex-col gap-[5px]">
+              <div className="w-8 h-[2.5px] bg-white rounded-sm"></div>
+              <div className="w-8 h-[2.5px] bg-white rounded-sm"></div>
+              <div className="w-8 h-[2.5px] bg-white rounded-sm"></div>
             </div>
           )}
         </button>
@@ -283,10 +320,10 @@ export default function Navbar() {
                     <Link
                       href="/"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
+                      className="h-full w-full flex flex-col items-center justify-center gap-3 hover:bg-white/5 transition-colors"
                     >
-                      <Home className="h-16 w-16 text-white" strokeWidth={1.5} />
-                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
+                      <Home className="h-12 w-12 text-white" strokeWidth={1.5} />
+                      <span className="text-sm font-bold tracking-[0.2em] uppercase text-white">
                         Home
                       </span>
                     </Link>
@@ -302,10 +339,10 @@ export default function Navbar() {
                     <Link
                       href="/about"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
+                      className="h-full w-full flex flex-col items-center justify-center gap-3 hover:bg-white/5 transition-colors"
                     >
-                      <span className="text-5xl font-bold text-white">B</span>
-                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
+                      <span className="text-4xl font-bold text-white">B</span>
+                      <span className="text-sm font-bold tracking-[0.2em] uppercase text-white">
                         About
                       </span>
                     </Link>
@@ -321,10 +358,10 @@ export default function Navbar() {
                     <Link
                       href="/projects"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
+                      className="h-full w-full flex flex-col items-center justify-center gap-3 hover:bg-white/5 transition-colors"
                     >
-                      <Globe className="h-16 w-16 text-white" strokeWidth={1.5} />
-                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
+                      <Globe className="h-12 w-12 text-white" strokeWidth={1.5} />
+                      <span className="text-sm font-bold tracking-[0.2em] uppercase text-white">
                         Projects
                       </span>
                     </Link>
@@ -340,10 +377,10 @@ export default function Navbar() {
                     <Link
                       href="/contact"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="h-full w-full flex flex-col items-center justify-center gap-4 hover:bg-white/5 transition-colors"
+                      className="h-full w-full flex flex-col items-center justify-center gap-3 hover:bg-white/5 transition-colors"
                     >
-                      <Mail className="h-16 w-16 text-white" strokeWidth={1.5} />
-                      <span className="text-base font-bold tracking-[0.2em] uppercase text-white">
+                      <Mail className="h-12 w-12 text-white" strokeWidth={1.5} />
+                      <span className="text-sm font-bold tracking-[0.2em] uppercase text-white">
                         Contact
                       </span>
                     </Link>

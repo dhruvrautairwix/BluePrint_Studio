@@ -59,9 +59,9 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden" style={{ backgroundColor: 'transparent' }}>
       {/* Background */}
-      <div className="absolute inset-0 -z-10 h-full w-full">
+      <div className="absolute inset-0 z-[1] h-full w-full">
         <Image
           src="/images/urban-bistro-mississauga-dining-3.png"
           alt="Dark interior background"
@@ -69,11 +69,10 @@ export default function ContactPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/40" />
       </div>
 
       {/* Bordered Section for Cards */}
-      <div className="relative w-full h-screen overflow-hidden">
+      <div className="relative z-[2] w-full h-screen overflow-hidden">
         {/* Drag Container */}
         <div
           ref={containerRef}

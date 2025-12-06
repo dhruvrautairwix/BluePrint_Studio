@@ -83,7 +83,7 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
             onPointerDown={handlePointerDown}
             onKeyDown={handleKeyDown}
           >
-            <div className={`relative overflow-hidden ${noAspect ? 'h-full flex-1' : 'aspect-[4/3]'} bg-gray-200 rounded-lg will-change-transform`}>
+            <div className={`relative overflow-hidden ${noAspect ? 'h-full flex-1' : 'aspect-[4/3]'} bg-gray-200 will-change-transform`}>
             <motion.div
               layoutId={mediaLayoutId}
               className="relative w-full h-full"

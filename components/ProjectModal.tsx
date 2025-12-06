@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Project } from "@/utils/data";
+import { useEffect } from "react";
 
 interface ProjectModalProps {
   project: Project | null;
@@ -13,6 +14,73 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   const handleCloseModal = () => {
     onClose(); // Just close the modal, don't navigate
   };
+
+  // Lock scroll when modal is open
+  useEffect(() => {
+    if (project) {
+      // Store original overflow and position values
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      const originalBodyPosition = document.body.style.position;
+      const scrollY = window.scrollY;
+      
+      // Disable scroll on body and html
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${scrollY}px`;
+      
+      // Add lenis-stopped class to html (for Lenis smooth scroll)
+      document.documentElement.classList.add('lenis-stopped');
+      
+      // Stop Lenis smooth scroll if it exists
+      const lenisInstance = (window as any).lenis;
+      if (lenisInstance && typeof lenisInstance.stop === 'function') {
+        lenisInstance.stop();
+      }
+
+      // Prevent scroll events from reaching the background (but allow modal content to scroll)
+      const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
+        const target = e.target as HTMLElement;
+        const modal = document.querySelector('[data-modal-container]');
+        
+        // Only prevent if the event is not from within the modal
+        if (modal && !modal.contains(target)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      // Add event listeners to prevent background scrolling
+      document.addEventListener('wheel', preventBackgroundScroll as EventListener, { passive: false });
+      document.addEventListener('touchmove', preventBackgroundScroll as EventListener, { passive: false });
+
+      return () => {
+        // Remove event listeners
+        document.removeEventListener('wheel', preventBackgroundScroll as EventListener);
+        document.removeEventListener('touchmove', preventBackgroundScroll as EventListener);
+        
+        // Remove lenis-stopped class
+        document.documentElement.classList.remove('lenis-stopped');
+        
+        // Restore original values
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        document.body.style.position = originalBodyPosition;
+        document.body.style.width = '';
+        document.body.style.top = '';
+        
+        // Restore scroll position
+        window.scrollTo(0, scrollY);
+        
+        // Resume Lenis smooth scroll if it exists
+        if (lenisInstance && typeof lenisInstance.start === 'function') {
+          lenisInstance.start();
+        }
+      };
+    }
+  }, [project]);
 
   if (!project) return null;
 
@@ -25,6 +93,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         transition={{ duration: 0.3 }}
         className="fixed inset-0 z-[45] bg-black/80 backdrop-blur-sm"
         onClick={handleCloseModal}
+        data-modal-container
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -33,6 +102,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="fixed top-24 left-0 right-0 bottom-0 z-[50] w-full bg-black overflow-hidden flex"
           onClick={(e) => e.stopPropagation()}
+          data-modal-container
         >
           {/* Left Panel - Text Content */}
           <div className="w-full lg:w-1/2 overflow-y-auto p-8 lg:p-12">

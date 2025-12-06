@@ -2,6 +2,7 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 const PreloaderContext = createContext<{ isLoading: boolean }>({ isLoading: true });
 
@@ -45,9 +46,30 @@ export default function Preloader({ children }: { children: ReactNode }) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.85 }}
                 transition={{ duration: 0.5 }}
-                className="text-white text-4xl font-bold"
+                className="flex flex-col items-center justify-center gap-4"
               >
-                Blueprint 3D Studio
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <Image
+                    src="/images/Main_Logo.png"
+                    alt="Company Logo"
+                    width={150}
+                    height={150}
+                    className="object-contain"
+                    priority
+                  />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="text-white text-4xl font-bold"
+                >
+                  Blueprint 3D Studio
+                </motion.div>
               </motion.div>
             </motion.div>
           )}

@@ -107,12 +107,12 @@ export default function ProjectsPage() {
       </div>
       
       {/* GRID LAYOUT - Matching Reference Image */}
-      <section className="px-4 sm:px-6 lg:px-10 py-10 pt-40 lg:pt-40">
-        <div className="max-w-[1800px] mx-auto">
+      <section className="py-10 pt-40 lg:pt-40">
+        <div className="w-full">
 
           {/* ROW 1 - Three columns with vertical offset - Matching Reference */}
           {filled[0] && filled[1] && filled[2] && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 mb-8 md:mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12 md:mb-24">
               <div className="md:col-span-7 h-[400px] md:h-[520px] relative md:-mt-6">
                 <ProjectCard project={filled[0]} activeSlug={selectedProject} onSelect={handleSelect} noAspect />
                     <div className="mt-3">
@@ -139,7 +139,7 @@ export default function ProjectsPage() {
 
           {/* ROW 2 - Two columns staggered */}
           {filled[3] && filled[4] && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8 md:mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12 md:mb-24">
               {/* Left card - MS WELLINGTON */}
               <div className="md:col-span-4 h-[380px] md:h-[480px] relative md:-mt-12">
                 <ProjectCard project={filled[3]} activeSlug={selectedProject} onSelect={handleSelect} noAspect />
@@ -160,7 +160,7 @@ export default function ProjectsPage() {
 
           {/* ROW 3 - Two columns reverse staggered */}
           {filled[5] && filled[6] && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8 md:mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12 md:mb-24">
               <div className="md:col-span-7 h-[400px] md:h-[520px] relative md:mt-4">
                 <ProjectCard project={filled[5]} activeSlug={selectedProject} onSelect={handleSelect} noAspect />
                     <div className="mt-3">
@@ -185,7 +185,7 @@ export default function ProjectsPage() {
             if (position === 0 && filled[7 + idx + 1] && filled[7 + idx + 2]) {
               // Repeat Row 1 pattern
               return (
-                <div key={project.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8 md:mb-16">
+                <div key={project.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12 md:mb-24">
                   <div className="md:col-span-5 h-[400px] md:h-[500px] relative md:-mt-8">
                     <ProjectCard project={filled[7 + idx]} activeSlug={selectedProject} onSelect={handleSelect} noAspect />
                         <div className="mt-3">
