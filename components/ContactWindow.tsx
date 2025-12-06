@@ -73,14 +73,15 @@ export default function ContactWindow({
         windowHeight = rect.height;
       }
 
-      const margin = 50; // Margin from screen edges to keep windows partially visible
+      const margin = 20; // Reduced margin to allow more movement
+      const bottomMargin = 10; // Even smaller margin for bottom to allow more downward movement
 
       // Constraints relative to initial position - allow full movement across entire screen
       // Calculate how far the window can move from its initial position
       const minX = -initialPosition.x + margin;
       const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
       const minY = -initialPosition.y + margin;
-      const maxY = window.innerHeight - windowHeight - initialPosition.y - margin;
+      const maxY = window.innerHeight - windowHeight - initialPosition.y - bottomMargin;
 
       return {
         left: minX,
@@ -131,11 +132,12 @@ export default function ContactWindow({
             windowHeight = rect.height;
           }
 
-          const margin = 50;
+          const margin = 20; // Reduced margin to allow more movement
+          const bottomMargin = 10; // Even smaller margin for bottom to allow more downward movement
           const minX = -initialPosition.x + margin;
           const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
           const minY = -initialPosition.y + margin;
-          const maxY = window.innerHeight - windowHeight - initialPosition.y - margin;
+          const maxY = window.innerHeight - windowHeight - initialPosition.y - bottomMargin;
 
           return { left: minX, right: maxX, top: minY, bottom: maxY };
         };
