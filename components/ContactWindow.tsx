@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, useRef, FormEvent } from "react";
 import { motion, useReducedMotion, useMotionValue } from "framer-motion";
 import emailjs from "@emailjs/browser";
 
@@ -35,6 +35,7 @@ export default function ContactWindow({
     top: 0,
     bottom: 0,
   });
+  const windowRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -63,12 +64,19 @@ export default function ContactWindow({
     const calculateConstraints = () => {
       if (typeof window === "undefined") return { left: 0, right: 0, top: 0, bottom: 0 };
 
-      // Use accurate window dimensions based on id
+      // Get actual window dimensions from the DOM element
       const windowWidth = id === "address" ? 500 : 400;
-      const windowHeight = 400; // Approximate window height
+      let windowHeight = 400; // Default fallback
+      
+      if (windowRef.current) {
+        const rect = windowRef.current.getBoundingClientRect();
+        windowHeight = rect.height;
+      }
+
       const margin = 50; // Margin from screen edges to keep windows partially visible
 
       // Constraints relative to initial position - allow full movement across entire screen
+      // Calculate how far the window can move from its initial position
       const minX = -initialPosition.x + margin;
       const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
       const minY = -initialPosition.y + margin;
@@ -86,15 +94,56 @@ export default function ContactWindow({
       setDragConstraints(calculateConstraints());
     };
 
-    updateConstraints();
+    // Use multiple requestAnimationFrame calls to ensure DOM is fully rendered
+    const timeoutId = setTimeout(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          updateConstraints();
+        });
+      });
+    }, 100);
 
     const handleResize = () => {
-      setDragConstraints(calculateConstraints());
+      requestAnimationFrame(() => {
+        setDragConstraints(calculateConstraints());
+      });
     };
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isMounted, initialPosition, id]);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMounted, initialPosition, id, isFocused]);
+
+  // Recalculate constraints when card becomes focused
+  useEffect(() => {
+    if (isFocused && isMounted && windowRef.current) {
+      requestAnimationFrame(() => {
+        const calculateConstraints = () => {
+          if (typeof window === "undefined") return { left: 0, right: 0, top: 0, bottom: 0 };
+
+          const windowWidth = id === "address" ? 500 : 400;
+          let windowHeight = 400;
+          
+          if (windowRef.current) {
+            const rect = windowRef.current.getBoundingClientRect();
+            windowHeight = rect.height;
+          }
+
+          const margin = 50;
+          const minX = -initialPosition.x + margin;
+          const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
+          const minY = -initialPosition.y + margin;
+          const maxY = window.innerHeight - windowHeight - initialPosition.y - margin;
+
+          return { left: minX, right: maxX, top: minY, bottom: maxY };
+        };
+        
+        setDragConstraints(calculateConstraints());
+      });
+    }
+  }, [isFocused, isMounted, initialPosition, id]);
 
   const contentArray = Array.isArray(content) ? content : [content];
 
@@ -170,6 +219,7 @@ export default function ContactWindow({
 
   return (
     <motion.div
+      ref={windowRef}
       initial={{ opacity: 0, scale: 0.85, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
