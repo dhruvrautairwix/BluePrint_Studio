@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useMotionValue } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const manifestoCopy = [
@@ -19,7 +19,6 @@ const windowBlueprint = [
     render: () => (
       <div 
         className="relative h-full w-full flex-shrink-0"
-        onPointerDown={(e) => e.stopPropagation()}
       >
         <Image
           src="https://images.unsplash.com/photo-1503386435953-66943ba0e08f?auto=format&fit=crop&w=1400&q=80"
@@ -138,16 +137,34 @@ export default function AboutPage() {
               ...prev,
               [win.id]: constraints
             }));
+          } else {
+            // If element not ready, set initial constraints based on blueprint
+            const margin = 20;
+            const bottomMargin = 0;
+            const constraints = {
+              left: -win.position.left + margin,
+              right: window.innerWidth - win.width - win.position.left - margin,
+              top: -win.position.top + margin,
+              bottom: window.innerHeight - win.height - win.position.top - bottomMargin,
+            };
+            setDragConstraints(prev => ({
+              ...prev,
+              [win.id]: constraints
+            }));
           }
         });
       };
 
       // Use multiple requestAnimationFrame to ensure DOM is ready
-      requestAnimationFrame(() => {
+      const timeoutId = setTimeout(() => {
         requestAnimationFrame(() => {
-          updateConstraints();
+          requestAnimationFrame(() => {
+            updateConstraints();
+          });
         });
-      });
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [isMounted, isMobile, activeCard]);
 
@@ -205,6 +222,7 @@ export default function AboutPage() {
                 dragConstraints={dragConstraints[win.id] ?? getDragConstraints(win.id, win.position.top, win.position.left)}
                 dragElastic={0.1}
                 dragMomentum={false}
+                dragPropagation={false}
                 onDragStart={() => handleCardFocus(win.id)}
                 onPointerDown={(e) => {
                   // Only focus if not clicking on close button or scrollable content
@@ -212,6 +230,7 @@ export default function AboutPage() {
                   if (!target.closest('button') && !target.closest('[data-scrollable]')) {
                     handleCardFocus(win.id);
                   }
+                  // Don't stop propagation - allow drag to work
                 }}
                 initial={{
                   opacity: 0,
@@ -227,6 +246,7 @@ export default function AboutPage() {
                   scale: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
                 }}
                 whileHover={isMounted && !isMobile ? { scale: isActive ? 1.05 : 1.02 } : {}}
+                whileDrag={{ cursor: "grabbing" }}
                 className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm transition-shadow select-none ${
                   shouldUseMobileStyles ? "relative w-full" : "absolute"
                 } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60 cursor-move" : "cursor-pointer"}`}
@@ -239,11 +259,6 @@ export default function AboutPage() {
               >
                 <div 
                   className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0"
-                  onPointerDown={(e) => {
-                    if (isActive) {
-                      e.stopPropagation();
-                    }
-                  }}
                 >
                   <span>{win.title}</span>
                   <div className="flex items-center gap-1">
