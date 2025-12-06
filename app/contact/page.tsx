@@ -72,11 +72,11 @@ export default function ContactPage() {
       </div>
 
       {/* Bordered Section for Cards */}
-      <div className="relative z-[2] w-full h-screen overflow-hidden">
+      <div className="relative z-[2] w-full h-screen overflow-visible">
         {/* Drag Container */}
         <div
           ref={containerRef}
-          className="relative w-full h-full overflow-hidden"
+          className="relative w-full h-full overflow-visible"
         >
           {windows.map((window) => (
             <ContactWindow

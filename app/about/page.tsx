@@ -71,6 +71,18 @@ export default function AboutPage() {
   const [zIndexCounter, setZIndexCounter] = useState(10);
   const [closedWindows, setClosedWindows] = useState<Set<string>>(new Set());
 
+  // Calculate drag constraints for full screen movement
+  const getDragConstraints = () => {
+    if (typeof window === "undefined" || isMobile) return false;
+    const margin = 100; // Margin from screen edges to keep cards partially visible
+    return {
+      left: -(window.innerWidth - margin),
+      right: window.innerWidth - margin,
+      top: -(window.innerHeight - margin),
+      bottom: window.innerHeight - margin,
+    };
+  };
+
   useEffect(() => {
     setIsMounted(true);
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -93,7 +105,7 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="relative min-h-screen h-screen w-full overflow-hidden bg-black text-white">
+    <div className="relative min-h-screen h-screen w-full overflow-visible bg-black text-white">
       <div className="absolute inset-0 h-full w-full">
         <Image
           src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1920&q=80"
@@ -105,14 +117,14 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-black/70" />
       </div>
 
-      <div className="relative flex min-h-screen flex-col">
+      <div className="relative flex min-h-screen flex-col overflow-visible">
 
         <div
           ref={canvasRef}
-          className="relative flex-1 px-4 pb-24 pt-6 md:px-12 md:pt-0"
+          className="relative flex-1 w-full h-full overflow-visible"
         >
           <div className="absolute inset-0" />
-          <div className="relative mx-auto flex h-full w-full max-w-6xl flex-col md:block">
+          <div className="relative w-full h-full">
             {windowBlueprint.map((win) => {
               const isActive = activeCard === win.id;
               const cardZIndex = isActive ? zIndexCounter : 10;
@@ -126,10 +138,11 @@ export default function AboutPage() {
               return (
               <motion.div
                 key={win.id}
-                drag={false}
-                dragConstraints={canvasRef}
-                dragElastic={0.02}
+                drag={isMounted && !isMobile && isActive}
+                dragConstraints={getDragConstraints()}
+                dragElastic={0.1}
                 dragMomentum={false}
+                onDragStart={() => handleCardFocus(win.id)}
                 onPointerDown={(e) => {
                   // Only focus if not clicking on close button or scrollable content
                   const target = e.target as HTMLElement;
@@ -152,8 +165,8 @@ export default function AboutPage() {
                 }}
                 whileHover={isMounted && !isMobile ? { scale: isActive ? 1.05 : 1.02 } : {}}
                 className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm transition-shadow select-none ${
-                  shouldUseMobileStyles ? "relative w-full" : "md:absolute"
-                } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60" : ""}`}
+                  shouldUseMobileStyles ? "relative w-full" : "absolute"
+                } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60 cursor-move" : "cursor-pointer"}`}
                 style={{
                   width: shouldUseMobileStyles ? "100%" : win.width,
                   height: shouldUseMobileStyles ? "auto" : win.height,
@@ -161,27 +174,26 @@ export default function AboutPage() {
                   zIndex: cardZIndex
                 }}
               >
-                <motion.div 
-                  drag={isMounted && !isMobile && isActive}
-                  dragConstraints={canvasRef}
-                  dragElastic={0.02}
-                  dragMomentum={false}
-                  onDragStart={() => handleCardFocus(win.id)}
-                  className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0 cursor-move"
+                <div 
+                  className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0"
+                  onPointerDown={(e) => {
+                    if (isActive) {
+                      e.stopPropagation();
+                    }
+                  }}
                 >
                   <span>{win.title}</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={(e) => handleCloseWindow(win.id, e)}
                       onPointerDown={(e) => e.stopPropagation()}
-                      onDragStart={(e) => e.preventDefault()}
                       className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-base leading-none hover:bg-white/10 hover:border-white/40 transition-colors cursor-pointer"
                       aria-label="Close window"
                     >
                       ×
                     </button>
                   </div>
-                </motion.div>
+                </div>
                 <div className="flex-1 min-h-0">
                   {win.render()}
                 </div>

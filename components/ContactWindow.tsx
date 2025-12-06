@@ -56,23 +56,23 @@ export default function ContactWindow({
   }, [isMounted, x, y]);
 
   useEffect(() => {
-    if (!isMounted || !dragScope.current || typeof window === "undefined") {
+    if (!isMounted || typeof window === "undefined") {
       return;
     }
 
     const calculateConstraints = () => {
-      if (!dragScope.current) return { left: 0, right: 0, top: 0, bottom: 0 };
+      if (typeof window === "undefined") return { left: 0, right: 0, top: 0, bottom: 0 };
 
-      const containerRect = dragScope.current.getBoundingClientRect();
       // Use accurate window dimensions based on id
       const windowWidth = id === "address" ? 500 : 400;
       const windowHeight = 400; // Approximate window height
+      const margin = 50; // Margin from screen edges to keep windows partially visible
 
-      // Constraints relative to initial position - allow full movement within container
-      const minX = -initialPosition.x;
-      const maxX = containerRect.width - windowWidth - initialPosition.x;
-      const minY = -initialPosition.y;
-      const maxY = containerRect.height - windowHeight - initialPosition.y;
+      // Constraints relative to initial position - allow full movement across entire screen
+      const minX = -initialPosition.x + margin;
+      const maxX = window.innerWidth - windowWidth - initialPosition.x - margin;
+      const minY = -initialPosition.y + margin;
+      const maxY = window.innerHeight - windowHeight - initialPosition.y - margin;
 
       return {
         left: minX,
@@ -83,10 +83,6 @@ export default function ContactWindow({
     };
 
     const updateConstraints = () => {
-      if (!dragScope.current) {
-        requestAnimationFrame(updateConstraints);
-        return;
-      }
       setDragConstraints(calculateConstraints());
     };
 
@@ -98,7 +94,7 @@ export default function ContactWindow({
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [isMounted, dragScope, initialPosition, x, y]);
+  }, [isMounted, initialPosition, id]);
 
   const contentArray = Array.isArray(content) ? content : [content];
 
