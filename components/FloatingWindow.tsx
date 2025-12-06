@@ -161,12 +161,19 @@ export default function FloatingWindow({
       exit={{ opacity: 0, scale: 1.02 }}
       transition={{ duration: 0.28 }}
       drag={isMounted && !prefersReducedMotion && !isMobile}
-      dragConstraints={dragConstraints}
+      dragConstraints={isMounted ? dragConstraints : false}
       dragMomentum={false}
       dragElastic={0.1}
       whileDrag={{ cursor: "grabbing" }}
-      onDragStart={() => onFocus(item.id)}
-      onPointerDown={() => onFocus(item.id)}
+      onDragStart={() => {
+        onFocus(item.id);
+      }}
+      onDrag={(event, info) => {
+        // Ensure drag is working - this will be called during drag
+      }}
+      onPointerDown={() => {
+        onFocus(item.id);
+      }}
       className={`${containerClass} ${isFocused ? "ring-2 ring-white/60" : ""
         }`}
       style={{
@@ -179,13 +186,17 @@ export default function FloatingWindow({
       }}
     >
       {/* Title Bar */}
-      <header className="flex items-center justify-between px-4 py-3 text-[0.7rem] uppercase tracking-[0.15em] bg-black/75 border-b border-white/10">
+      <header 
+        className="flex items-center justify-between px-4 py-3 text-[0.7rem] uppercase tracking-[0.15em] bg-black/75 border-b border-white/10"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <span className="truncate">{item.title}</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
             onClose(item.id);
           }}
+          onPointerDown={(e) => e.stopPropagation()}
           className="h-7 w-7 flex items-center justify-center hover:bg-white/10 rounded"
         >
           ×
