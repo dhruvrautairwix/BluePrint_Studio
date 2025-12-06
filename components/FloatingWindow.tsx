@@ -28,6 +28,7 @@ export default function FloatingWindow({
 }: FloatingWindowProps) {
   const prefersReducedMotion = useReducedMotion();
   const windowRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   const windowWidth = item.dimensions?.width ?? 420;
   const windowHeight = item.dimensions?.height ?? 320;
@@ -46,20 +47,15 @@ export default function FloatingWindow({
 
   // Constraint calculation
   const calculateConstraints = () => {
-    if (typeof window === "undefined")
+    if (typeof window === "undefined" || !windowRef.current)
       return { left: -10000, right: 10000, top: -10000, bottom: 10000 };
 
     const margin = 0; // No margin to allow full movement to edges
 
-    // Get actual element dimensions if available
-    let actualWidth = windowWidth;
-    let actualHeight = windowHeight;
-    
-    if (windowRef.current) {
-      const elementRect = windowRef.current.getBoundingClientRect();
-      if (elementRect.width > 0) actualWidth = elementRect.width;
-      if (elementRect.height > 0) actualHeight = elementRect.height;
-    }
+    // Get actual element dimensions
+    const elementRect = windowRef.current.getBoundingClientRect();
+    const actualWidth = elementRect.width > 0 ? elementRect.width : windowWidth;
+    const actualHeight = elementRect.height > 0 ? elementRect.height : windowHeight;
 
     // Use viewport dimensions for full screen movement
     // Since the window is centered (50% left, 50% top with translate), 
@@ -67,15 +63,15 @@ export default function FloatingWindow({
     // Window center starts at viewport center (window.innerWidth/2, window.innerHeight/2)
     // To move left edge to 0: center at (actualWidth/2), translate by -(window.innerWidth/2 - actualWidth/2)
     // To move right edge to window.innerWidth: center at (window.innerWidth - actualWidth/2), translate by (window.innerWidth/2 - actualWidth/2)
-    const maxOffsetX = window.innerWidth / 2 - actualWidth / 2 - margin;
-    const maxOffsetY = window.innerHeight / 2 - actualHeight / 2 - margin;
+    const maxOffsetX = (window.innerWidth / 2) - (actualWidth / 2) - margin;
+    const maxOffsetY = (window.innerHeight / 2) - (actualHeight / 2) - margin;
 
     // Ensure constraints are valid (not NaN or Infinity) and allow full movement
     const constraints = { 
-      left: isFinite(-maxOffsetX) ? -maxOffsetX : -10000, 
-      right: isFinite(maxOffsetX) ? maxOffsetX : 10000, 
-      top: isFinite(-maxOffsetY) ? -maxOffsetY : -10000, 
-      bottom: isFinite(maxOffsetY) ? maxOffsetY : 10000 
+      left: isFinite(-maxOffsetX) && !isNaN(-maxOffsetX) ? -maxOffsetX : -10000, 
+      right: isFinite(maxOffsetX) && !isNaN(maxOffsetX) ? maxOffsetX : 10000, 
+      top: isFinite(-maxOffsetY) && !isNaN(-maxOffsetY) ? -maxOffsetY : -10000, 
+      bottom: isFinite(maxOffsetY) && !isNaN(maxOffsetY) ? maxOffsetY : 10000 
     };
 
     return constraints;
@@ -90,9 +86,13 @@ export default function FloatingWindow({
     };
   };
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Initialize position AFTER layout is ready
   useEffect(() => {
-    if (!initialPosition) return;
+    if (!initialPosition || !isMounted) return;
 
     const update = (attempts = 0) => {
       if (!windowRef.current && attempts < 10) {
@@ -120,7 +120,7 @@ export default function FloatingWindow({
     };
 
     update();
-  }, [windowWidth, windowHeight, initialPosition, isFocused]);
+  }, [windowWidth, windowHeight, initialPosition, isFocused, isMounted]);
 
   // Re-clamp on viewport resize and when card becomes focused
   useEffect(() => {
@@ -141,13 +141,13 @@ export default function FloatingWindow({
     };
 
     // Recalculate constraints on mount and when card becomes focused
-    if (windowRef.current) {
+    if (isMounted && windowRef.current) {
       updateConstraints();
     }
 
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [isFocused]);
+  }, [isFocused, isMounted]);
 
   const containerClass = isMobile
     ? "relative w-full bg-black/85 text-white rounded-sm border border-white/20 overflow-hidden select-none cursor-move mb-6"
@@ -160,10 +160,11 @@ export default function FloatingWindow({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.02 }}
       transition={{ duration: 0.28 }}
-      drag={!prefersReducedMotion}
+      drag={isMounted && !prefersReducedMotion && !isMobile}
       dragConstraints={dragConstraints}
       dragMomentum={false}
       dragElastic={0.1}
+      whileDrag={{ cursor: "grabbing" }}
       onDragStart={() => onFocus(item.id)}
       onPointerDown={() => onFocus(item.id)}
       className={`${containerClass} ${isFocused ? "ring-2 ring-white/60" : ""
