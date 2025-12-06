@@ -18,17 +18,15 @@ export default function DynamitePage() {
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
   const clamp = (x: number, y: number, width: number, height: number) => {
-    if (!scopeRef.current || isMobile) return { x: 0, y: 0 };
+    if (typeof window === "undefined" || isMobile) return { x: 0, y: 0 };
 
-    const rect = scopeRef.current.getBoundingClientRect();
-    const margin = 10; // Reduced margin to allow more movement
+    const margin = 0; // No margin to allow full movement to edges
 
-    // Allow full width movement: from left edge (margin) to right edge (width - margin - windowWidth)
-    // Since window is centered at 50%, we need to calculate offsets from center
-    // Left edge: window center at (width/2 + margin), translate by -(rect.width/2 - width/2 - margin)
-    // Right edge: window center at (rect.width - width/2 - margin), translate by (rect.width/2 - width/2 - margin)
-    const maxOffsetX = rect.width / 2 - width / 2 - margin;
-    const maxOffsetY = rect.height / 2 - height / 2 - margin;
+    // Use viewport dimensions for full screen movement
+    // Since window is centered at 50%, calculate offsets from viewport center
+    // Allow full movement from left edge (0) to right edge (window.innerWidth)
+    const maxOffsetX = window.innerWidth / 2 - width / 2 - margin;
+    const maxOffsetY = window.innerHeight / 2 - height / 2 - margin;
 
     return {
       x: Math.max(-maxOffsetX, Math.min(maxOffsetX, x)),

@@ -45,10 +45,9 @@ export default function FloatingWindow({
 
   // Constraint calculation
   const calculateConstraints = () => {
-    if (typeof window === "undefined" || !dragScope.current)
+    if (typeof window === "undefined")
       return { left: 0, right: 0, top: 0, bottom: 0 };
 
-    const rect = dragScope.current.getBoundingClientRect();
     const margin = 0; // No margin to allow full movement to edges
 
     // Get actual element dimensions if available
@@ -61,13 +60,14 @@ export default function FloatingWindow({
       if (elementRect.height > 0) actualHeight = elementRect.height;
     }
 
+    // Use viewport dimensions for full screen movement
     // Since the window is centered (50% left, 50% top with translate), 
-    // calculate constraints to allow full movement to all edges
-    // Window center starts at rect.width/2, rect.height/2
-    // To move left edge to 0: center at (actualWidth/2), translate by -(rect.width/2 - actualWidth/2)
-    // To move right edge to rect.width: center at (rect.width - actualWidth/2), translate by (rect.width/2 - actualWidth/2)
-    const maxOffsetX = rect.width / 2 - actualWidth / 2 - margin;
-    const maxOffsetY = rect.height / 2 - actualHeight / 2 - margin;
+    // calculate constraints to allow full movement to all screen edges
+    // Window center starts at viewport center (window.innerWidth/2, window.innerHeight/2)
+    // To move left edge to 0: center at (actualWidth/2), translate by -(window.innerWidth/2 - actualWidth/2)
+    // To move right edge to window.innerWidth: center at (window.innerWidth - actualWidth/2), translate by (window.innerWidth/2 - actualWidth/2)
+    const maxOffsetX = window.innerWidth / 2 - actualWidth / 2 - margin;
+    const maxOffsetY = window.innerHeight / 2 - actualHeight / 2 - margin;
 
     return { 
       left: -maxOffsetX, 
