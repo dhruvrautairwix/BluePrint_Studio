@@ -70,16 +70,33 @@ export default function AboutPage() {
   const [activeCard, setActiveCard] = useState<string | null>(null);
   const [zIndexCounter, setZIndexCounter] = useState(10);
   const [closedWindows, setClosedWindows] = useState<Set<string>>(new Set());
+  const [dragConstraints, setDragConstraints] = useState<Record<string, any>>({});
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Calculate drag constraints for full screen movement
-  const getDragConstraints = () => {
+  // Calculate drag constraints for full screen movement using actual element dimensions
+  const getDragConstraints = (cardId: string, initialTop: number, initialLeft: number) => {
     if (typeof window === "undefined" || isMobile) return false;
-    const margin = 100; // Margin from screen edges to keep cards partially visible
+    
+    const cardElement = cardRefs.current[cardId];
+    let cardWidth = windowBlueprint.find(w => w.id === cardId)?.width || 520;
+    let cardHeight = windowBlueprint.find(w => w.id === cardId)?.height || 520;
+    
+    // Use actual element dimensions if available
+    if (cardElement) {
+      const rect = cardElement.getBoundingClientRect();
+      if (rect.width > 0) cardWidth = rect.width;
+      if (rect.height > 0) cardHeight = rect.height;
+    }
+    
+    const margin = 20; // Reduced margin to allow more movement
+    const bottomMargin = 0; // No margin at bottom - allow cards to reach the very bottom
+    
+    // Constraints relative to initial position
     return {
-      left: -(window.innerWidth - margin),
-      right: window.innerWidth - margin,
-      top: -(window.innerHeight - margin),
-      bottom: window.innerHeight - margin,
+      left: -initialLeft + margin,
+      right: window.innerWidth - cardWidth - initialLeft - margin,
+      top: -initialTop + margin,
+      bottom: window.innerHeight - cardHeight - initialTop - bottomMargin,
     };
   };
 
@@ -90,6 +107,47 @@ export default function AboutPage() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Recalculate constraints when card becomes active to ensure accurate dimensions
+  useEffect(() => {
+    if (isMounted && !isMobile) {
+      const updateConstraints = () => {
+        windowBlueprint.forEach((win) => {
+          const cardElement = cardRefs.current[win.id];
+          if (cardElement) {
+            let cardWidth = win.width;
+            let cardHeight = win.height;
+            
+            const rect = cardElement.getBoundingClientRect();
+            if (rect.width > 0) cardWidth = rect.width;
+            if (rect.height > 0) cardHeight = rect.height;
+            
+            const margin = 20;
+            const bottomMargin = 0;
+            
+            const constraints = {
+              left: -win.position.left + margin,
+              right: window.innerWidth - cardWidth - win.position.left - margin,
+              top: -win.position.top + margin,
+              bottom: window.innerHeight - cardHeight - win.position.top - bottomMargin,
+            };
+            
+            setDragConstraints(prev => ({
+              ...prev,
+              [win.id]: constraints
+            }));
+          }
+        });
+      };
+
+      // Use multiple requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          updateConstraints();
+        });
+      });
+    }
+  }, [isMounted, isMobile, activeCard]);
 
   const handleCardFocus = (cardId: string) => {
     setActiveCard(cardId);
@@ -138,8 +196,11 @@ export default function AboutPage() {
               return (
               <motion.div
                 key={win.id}
+                ref={(el) => {
+                  if (el) cardRefs.current[win.id] = el;
+                }}
                 drag={isMounted && !isMobile && isActive}
-                dragConstraints={getDragConstraints()}
+                dragConstraints={dragConstraints[win.id] || getDragConstraints(win.id, win.position.top, win.position.left)}
                 dragElastic={0.1}
                 dragMomentum={false}
                 onDragStart={() => handleCardFocus(win.id)}
