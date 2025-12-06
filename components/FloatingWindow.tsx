@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, useReducedMotion, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import type { DynamiteItem } from "@/utils/data";
@@ -27,6 +27,7 @@ export default function FloatingWindow({
   isMobile = false,
 }: FloatingWindowProps) {
   const prefersReducedMotion = useReducedMotion();
+  const windowRef = useRef<HTMLDivElement>(null);
 
   const windowWidth = item.dimensions?.width ?? 420;
   const windowHeight = item.dimensions?.height ?? 320;
@@ -48,15 +49,25 @@ export default function FloatingWindow({
       return { left: 0, right: 0, top: 0, bottom: 0 };
 
     const rect = dragScope.current.getBoundingClientRect();
-    const margin = 10; // Reduced margin to allow more movement
+    const margin = 0; // No margin to allow full movement to edges
+
+    // Get actual element dimensions if available
+    let actualWidth = windowWidth;
+    let actualHeight = windowHeight;
+    
+    if (windowRef.current) {
+      const elementRect = windowRef.current.getBoundingClientRect();
+      if (elementRect.width > 0) actualWidth = elementRect.width;
+      if (elementRect.height > 0) actualHeight = elementRect.height;
+    }
 
     // Since the window is centered (50% left, 50% top with translate), 
-    // calculate symmetric constraints for equal spacing on both sides
+    // calculate constraints to allow full movement to all edges
     // Window center starts at rect.width/2, rect.height/2
-    // To move left edge to margin: center at (windowWidth/2 + margin), translate by -(rect.width/2 - windowWidth/2 - margin)
-    // To move right edge to (rect.width - margin): center at (rect.width - windowWidth/2 - margin), translate by (rect.width/2 - windowWidth/2 - margin)
-    const maxOffsetX = rect.width / 2 - windowWidth / 2 - margin;
-    const maxOffsetY = rect.height / 2 - windowHeight / 2 - margin;
+    // To move left edge to 0: center at (actualWidth/2), translate by -(rect.width/2 - actualWidth/2)
+    // To move right edge to rect.width: center at (rect.width - actualWidth/2), translate by (rect.width/2 - actualWidth/2)
+    const maxOffsetX = rect.width / 2 - actualWidth / 2 - margin;
+    const maxOffsetY = rect.height / 2 - actualHeight / 2 - margin;
 
     return { 
       left: -maxOffsetX, 
@@ -85,34 +96,51 @@ export default function FloatingWindow({
         return;
       }
 
-      const c = calculateConstraints();
-      setDragConstraints(c);
+      // Use multiple requestAnimationFrame to ensure element is measured
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const c = calculateConstraints();
+          setDragConstraints(c);
 
-      const baseX = initialPosition.x ?? 0;
-      const baseY = initialPosition.y ?? 0;
-      const fixed = clamp(baseX, baseY);
+          const baseX = initialPosition.x ?? 0;
+          const baseY = initialPosition.y ?? 0;
+          const fixed = clamp(baseX, baseY);
 
-      x.set(fixed.x);
-      y.set(fixed.y);
+          x.set(fixed.x);
+          y.set(fixed.y);
+        });
+      });
     };
 
-    requestAnimationFrame(update);
-  }, [windowWidth, windowHeight, initialPosition]);
+    update();
+  }, [windowWidth, windowHeight, initialPosition, isFocused]);
 
-  // Re-clamp on viewport resize
+  // Re-clamp on viewport resize and when card becomes focused
   useEffect(() => {
     const onResize = () => {
-      const c = calculateConstraints();
-      setDragConstraints(c);
+      requestAnimationFrame(() => {
+        const c = calculateConstraints();
+        setDragConstraints(c);
 
-      const fixed = clamp(x.get(), y.get());
-      x.set(fixed.x);
-      y.set(fixed.y);
+        const fixed = clamp(x.get(), y.get());
+        x.set(fixed.x);
+        y.set(fixed.y);
+      });
     };
+
+    // Recalculate constraints when card becomes focused
+    if (isFocused && windowRef.current) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const c = calculateConstraints();
+          setDragConstraints(c);
+        });
+      });
+    }
 
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, []);
+  }, [isFocused]);
 
   const containerClass = isMobile
     ? "relative w-full bg-black/85 text-white rounded-sm border border-white/20 overflow-hidden select-none cursor-move mb-6"
@@ -120,6 +148,7 @@ export default function FloatingWindow({
 
   return (
     <motion.div
+      ref={windowRef}
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.02 }}
