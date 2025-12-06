@@ -38,7 +38,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const categoryLayoutId = prefersReducedMotion ? undefined : `project-category-${project.slug}`;
 
   return (
-    <div className="pt-20">
+    <div className="pt-20 min-h-screen w-full overflow-y-auto">
       <motion.div
         layoutId={cardLayoutId}
         className="relative h-[60vh] md:h-[70vh] overflow-hidden"
