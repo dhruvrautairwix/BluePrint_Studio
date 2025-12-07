@@ -21,9 +21,17 @@ export default function Navbar() {
   const [temperature, setTemperature] = useState<string>("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Set mounted state to prevent hydration errors
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Update time to show user's local time
   useEffect(() => {
+    if (!isMounted) return;
+    
     const formatter = new Intl.DateTimeFormat("en-CA", {
       hour: "numeric",
       minute: "2-digit",
@@ -36,10 +44,12 @@ export default function Navbar() {
 
     const interval = window.setInterval(updateTime, 60_000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [isMounted]);
 
   // Fetch temperature for Mississauga
   useEffect(() => {
+    if (!isMounted) return;
+    
     const fetchTemperature = async () => {
       try {
         // Using OpenWeatherMap API (free tier)
@@ -67,10 +77,12 @@ export default function Navbar() {
     // Refresh temperature every 10 minutes
     const interval = setInterval(fetchTemperature, 600000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMounted]);
 
   // Scroll detection for navbar background
   useEffect(() => {
+    if (!isMounted) return;
+    
     const handleScroll = () => {
       // Support both regular scroll and Lenis smooth scroll
       const scrollPosition = window.scrollY || document.documentElement.scrollTop || window.pageYOffset;
@@ -86,7 +98,7 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("wheel", handleScroll);
     };
-  }, []);
+  }, [isMounted]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -138,12 +150,12 @@ export default function Navbar() {
 
           {/* Right - Time and Location */}
           <div className="flex items-center justify-end gap-2 xl:gap-3 text-[0.65rem] xl:text-xs tracking-[0.2em] xl:tracking-[0.25em] text-white/90 uppercase flex-shrink-0 whitespace-nowrap">
-            <span>{localTime}</span>
-            <span>|</span>
+            {isMounted && localTime && <span>{localTime}</span>}
+            {isMounted && localTime && <span>|</span>}
             <span>MISSISSAUGA</span>
             <span>|</span>
             <span>ONTARIO</span>
-            {temperature && (
+            {isMounted && temperature && (
               <>
                 <span>|</span>
                 <span>{temperature}°C</span>
@@ -173,8 +185,8 @@ export default function Navbar() {
             
             {/* Time and Location Info */}
             <div className="flex items-center gap-2.5 text-[0.7rem] sm:text-xs tracking-[0.3em] text-white/80 uppercase">
-              <span>{localTime}</span>
-              <span>|</span>
+              {isMounted && localTime && <span>{localTime}</span>}
+              {isMounted && localTime && <span>|</span>}
               <span>MISSISSAUGA</span>
             </div>
           </div>

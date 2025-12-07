@@ -3,15 +3,25 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useReducedMotion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 export default function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const reduce = useReducedMotion();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // If reduced motion is preferred, render without animation
   if (reduce) {
     return <div className="w-full h-full min-h-screen">{children}</div>;
+  }
+
+  // During SSR and initial mount, render without animation to prevent hydration mismatch
+  if (!isMounted) {
+    return <div className="w-full h-full min-h-screen bg-black">{children}</div>;
   }
 
   return (
