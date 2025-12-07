@@ -265,11 +265,6 @@
   height: 100%;
 }
 
-// Smooth scroll behavior
-:global(html) {
-  scroll-behavior: smooth;
-}
-
 // Mobile optimizations
 @media (max-width: 1023px) {
   .sidebar {
