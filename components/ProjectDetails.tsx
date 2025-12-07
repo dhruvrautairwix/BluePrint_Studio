@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { useRef } from "react";
 import styles from "./ProjectDetails.module.scss";
 import type { Project } from "@/utils/data";
 
@@ -12,44 +11,45 @@ interface ProjectDetailsProps {
 
 export default function ProjectDetails({ project }: ProjectDetailsProps) {
   const prefersReducedMotion = useReducedMotion();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  // Parallax effect for hero image
-  const heroY = useTransform(
-    scrollYProgress,
-    [0, 1],
-    prefersReducedMotion ? [0, 0] : [0, -100]
-  );
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
     <div className={styles.projectDetails}>
-      {/* Dark Intro Section - Hero + Sidebar */}
-      <section className={styles.heroSection} ref={heroRef}>
-        <div className={styles.heroContainer}>
-          {/* Hero Text */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className={styles.heroText}
-          >
-            <h1 className={styles.heroTitle}>{project.title}</h1>
-            <p className={styles.heroDescription}>{project.description}</p>
-          </motion.div>
+      <div className={styles.container}>
+        {/* Left Sidebar - Project Information */}
+        <motion.aside
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className={styles.sidebar}
+        >
+          <div className={styles.sidebarContent}>
+            {/* Project Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              className={styles.projectTitle}
+            >
+              {project.title}
+            </motion.h1>
 
-          {/* Project Meta Sidebar */}
-          <motion.aside
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className={styles.metaSidebar}
-          >
-            <div className={styles.metaContent}>
+            {/* Project Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className={styles.projectDescription}
+            >
+              {project.description}
+            </motion.p>
+
+            {/* Project Meta Information */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className={styles.metaContent}
+            >
               {project.location && (
                 <div className={styles.metaItem}>
                   <span className={styles.metaLabel}>Location</span>
@@ -78,61 +78,70 @@ export default function ProjectDetails({ project }: ProjectDetailsProps) {
                 <span className={styles.metaLabel}>Status</span>
                 <span className={styles.metaValue}>Completed</span>
               </div>
-            </div>
-          </motion.aside>
-        </div>
+            </motion.div>
+          </div>
+        </motion.aside>
 
-        {/* Hero Image with Parallax */}
-        {project.coverImage && (
-          <motion.div
-            style={{
-              y: heroY,
-              opacity: heroOpacity,
-            }}
-            className={styles.heroImage}
-          >
-            <Image
-              src={project.coverImage}
-              alt={project.title}
-              fill
-              className={styles.heroImageContent}
-              priority
-              sizes="100vw"
-            />
-          </motion.div>
-        )}
-      </section>
-
-      {/* Light Lower Section - Dynamic Images */}
-      {project.images && project.images.length > 0 && (
-        <section className={styles.imagesSection}>
-          {project.images.map((imageSrc, index) => (
+        {/* Right Column - Image Gallery */}
+        <div className={styles.imageGallery}>
+          {/* Main Image */}
+          {project.coverImage && (
             <motion.div
-              key={`${imageSrc}-${index}`}
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{
-                duration: 0.8,
-                delay: index * 0.1,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className={styles.imageBlock}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className={styles.mainImageWrapper}
             >
-              <div className={styles.imageWrapper}>
+              <div className={styles.mainImageContainer}>
                 <Image
-                  src={imageSrc}
-                  alt={`${project.title} - Image ${index + 1}`}
+                  src={project.coverImage}
+                  alt={project.title}
                   fill
-                  className={styles.imageContent}
-                  sizes="100vw"
-                  loading={index < 3 ? "eager" : "lazy"}
+                  className={styles.mainImage}
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
             </motion.div>
-          ))}
-        </section>
-      )}
+          )}
+
+          {/* All Project Images */}
+          {project.images && project.images.length > 0 && (
+            <div className={styles.imagesList}>
+              {project.images.map((imageSrc, index) => {
+                // Skip the cover image if it's already shown as the main image
+                if (imageSrc === project.coverImage) return null;
+
+                return (
+                  <motion.div
+                    key={`${imageSrc}-${index}`}
+                    initial={{ opacity: 0, y: 60 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{
+                      duration: 0.8,
+                      delay: prefersReducedMotion ? 0 : index * 0.1,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className={styles.imageBlock}
+                  >
+                    <div className={styles.imageWrapper}>
+                      <Image
+                        src={imageSrc}
+                        alt={`${project.title} - Image ${index + 1}`}
+                        fill
+                        className={styles.imageContent}
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        loading={index < 3 ? "eager" : "lazy"}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
