@@ -19,7 +19,6 @@ const windowBlueprint = [
     render: () => (
       <div 
         className="relative h-full w-full flex-shrink-0"
-        onPointerDown={(e) => e.stopPropagation()}
       >
         <Image
           src="https://images.unsplash.com/photo-1503386435953-66943ba0e08f?auto=format&fit=crop&w=1400&q=80"
@@ -76,9 +75,9 @@ export default function AboutPage() {
     if (typeof window === "undefined" || isMobile) return false;
     const margin = 100; // Margin from screen edges to keep cards partially visible
     return {
-      left: -(window.innerWidth - margin),
+      left: -window.innerWidth + margin,
       right: window.innerWidth - margin,
-      top: -(window.innerHeight - margin),
+      top: -window.innerHeight + margin,
       bottom: window.innerHeight - margin,
     };
   };
@@ -138,7 +137,7 @@ export default function AboutPage() {
               return (
               <motion.div
                 key={win.id}
-                drag={isMounted && !isMobile && isActive}
+                drag={isMounted && !isMobile}
                 dragConstraints={getDragConstraints()}
                 dragElastic={0.1}
                 dragMomentum={false}
@@ -166,7 +165,9 @@ export default function AboutPage() {
                 whileHover={isMounted && !isMobile ? { scale: isActive ? 1.05 : 1.02 } : {}}
                 className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm transition-shadow select-none ${
                   shouldUseMobileStyles ? "relative w-full" : "absolute"
-                } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60 cursor-move" : "cursor-pointer"}`}
+                } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60" : ""} ${
+                  !shouldUseMobileStyles ? "cursor-move" : ""
+                }`}
                 style={{
                   width: shouldUseMobileStyles ? "100%" : win.width,
                   height: shouldUseMobileStyles ? "auto" : win.height,
@@ -175,12 +176,7 @@ export default function AboutPage() {
                 }}
               >
                 <div 
-                  className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0"
-                  onPointerDown={(e) => {
-                    if (isActive) {
-                      e.stopPropagation();
-                    }
-                  }}
+                  className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0 cursor-move"
                 >
                   <span>{win.title}</span>
                   <div className="flex items-center gap-1">
