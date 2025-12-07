@@ -21,7 +21,7 @@ const windowBlueprint = [
         className="relative h-full w-full flex-shrink-0"
       >
         <Image
-          src="https://images.unsplash.com/photo-1503386435953-66943ba0e08f?auto=format&fit=crop&w=1400&q=80"
+          src="/images/about/about-1.jpg"
           alt="Studio portrait"
           fill
           className="object-cover"
@@ -141,7 +141,13 @@ export default function AboutPage() {
                 dragConstraints={getDragConstraints()}
                 dragElastic={0.1}
                 dragMomentum={false}
-                onDragStart={() => handleCardFocus(win.id)}
+                onDragStart={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button') || target.tagName === 'BUTTON') {
+                    return false;
+                  }
+                  handleCardFocus(win.id);
+                }}
                 onPointerDown={(e) => {
                   // Only focus if not clicking on close button or scrollable content
                   const target = e.target as HTMLElement;
@@ -179,12 +185,35 @@ export default function AboutPage() {
                   className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0 cursor-move"
                 >
                   <span>{win.title}</span>
-                  <div className="flex items-center gap-1">
+                  <div 
+                    className="flex items-center gap-1"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     <button
-                      onClick={(e) => handleCloseWindow(win.id, e)}
-                      onPointerDown={(e) => e.stopPropagation()}
-                      className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-base leading-none hover:bg-white/10 hover:border-white/40 transition-colors cursor-pointer"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.nativeEvent.stopImmediatePropagation();
+                        handleCloseWindow(win.id, e);
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.nativeEvent.stopImmediatePropagation();
+                      }}
+                      onPointerDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.nativeEvent.stopImmediatePropagation();
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-base leading-none hover:bg-white/10 hover:border-white/40 transition-colors cursor-pointer z-50 relative"
                       aria-label="Close window"
+                      type="button"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       ×
                     </button>
