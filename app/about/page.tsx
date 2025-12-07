@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const manifestoCopy = [
@@ -15,7 +15,7 @@ const windowBlueprint = [
     title: "ABOUT",
     width: 520,
     height: 520,
-    position: { top: 80, left: 270 },
+    position: { top: 95, left: 270 },
     render: () => (
       <div 
         className="relative h-full w-full flex-shrink-0"
@@ -35,7 +35,7 @@ const windowBlueprint = [
     title: "ABOUT",
     width: 560,
     height: 520,
-    position: { top: 160, left: 650 },
+    position: { top: 180, left: 670 },
     render: () => (
       <div className="flex h-full flex-col bg-black/90">
         <div className="px-6 pb-6 pt-6">
