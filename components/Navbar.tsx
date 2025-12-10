@@ -46,17 +46,18 @@ export default function Navbar() {
     return () => window.clearInterval(interval);
   }, [isMounted]);
 
-  // Fetch temperature for Mississauga
+  // Fetch temperature based on user's location
   useEffect(() => {
     if (!isMounted) return;
     
-    const fetchTemperature = async () => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
+    const fetchTemperature = async (latitude: number, longitude: number) => {
       try {
-        // Using OpenWeatherMap API (free tier)
-        // You'll need to get an API key from https://openweathermap.org/api
-        // For now, using a free alternative: Open-Meteo API (no API key required)
+        // Using Open-Meteo API (no API key required)
+        // Get timezone automatically based on coordinates
         const response = await fetch(
-          "https://api.open-meteo.com/v1/forecast?latitude=43.5890&longitude=-79.6441&current=temperature_2m&timezone=America/Toronto"
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&timezone=auto`
         );
         
         if (response.ok) {
@@ -73,10 +74,48 @@ export default function Navbar() {
       }
     };
 
-    fetchTemperature();
-    // Refresh temperature every 10 minutes
-    const interval = setInterval(fetchTemperature, 600000);
-    return () => clearInterval(interval);
+    // Get user's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchTemperature(latitude, longitude);
+          
+          // Refresh temperature every 10 minutes
+          intervalId = setInterval(() => {
+            fetchTemperature(latitude, longitude);
+          }, 600000);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          // Fallback to Mississauga if user denies location or it's unavailable
+          fetchTemperature(43.5890, -79.6441);
+          
+          // Set up interval for fallback location too
+          intervalId = setInterval(() => {
+            fetchTemperature(43.5890, -79.6441);
+          }, 600000);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 300000 // Cache location for 5 minutes
+        }
+      );
+    } else {
+      // Fallback to Mississauga if geolocation is not supported
+      fetchTemperature(43.5890, -79.6441);
+      intervalId = setInterval(() => {
+        fetchTemperature(43.5890, -79.6441);
+      }, 600000);
+    }
+    
+    // Cleanup interval on unmount
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [isMounted]);
 
   // Scroll detection for navbar background
@@ -153,8 +192,6 @@ export default function Navbar() {
             {isMounted && localTime && <span>{localTime}</span>}
             {isMounted && localTime && <span>|</span>}
             <span>MISSISSAUGA</span>
-            <span>|</span>
-            <span>ONTARIO</span>
             {isMounted && temperature && (
               <>
                 <span>|</span>

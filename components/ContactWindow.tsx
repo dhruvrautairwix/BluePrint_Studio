@@ -14,6 +14,7 @@ interface ContactWindowProps {
   zIndex: number;
   dragScope: React.RefObject<HTMLDivElement>;
   isFocused?: boolean;
+  isMobile?: boolean;
 }
 
 export default function ContactWindow({
@@ -26,6 +27,7 @@ export default function ContactWindow({
   zIndex,
   dragScope,
   isFocused = false,
+  isMobile = false,
 }: ContactWindowProps) {
   const prefersReducedMotion = useReducedMotion();
   const [isMounted, setIsMounted] = useState(false);
@@ -225,24 +227,35 @@ export default function ContactWindow({
       initial={{ opacity: 0, scale: 0.85, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      drag={isMounted && !prefersReducedMotion && isFocused}
+      drag={isMounted && !prefersReducedMotion && isFocused && !isMobile}
       dragConstraints={dragConstraints}
       dragElastic={0.02}
       dragMomentum={false}
       whileDrag={{ cursor: "grabbing" }}
-      onPointerDown={() => onFocus(id)}
+      onPointerDown={() => {
+        if (!isMobile) {
+          onFocus(id);
+        }
+      }}
       style={{
-        left: initialPosition.x,
-        top: initialPosition.y,
-        x,
-        y,
+        ...(isMobile ? {} : {
+          left: initialPosition.x,
+          top: initialPosition.y,
+          x,
+          y,
+          position: "absolute",
+        }),
+        ...(isMobile ? {
+          position: "relative",
+        } : {}),
         zIndex,
-        position: "absolute",
       }}
       // Window width tweaks per card (address gets the larger form layout)
-      className={`bg-black border-2 border-white overflow-hidden select-none cursor-move ${
-        id === "address" ? "w-[500px]" : "w-[400px]"
-      } max-w-[90vw] ${isFocused ? "ring-2 ring-white/60" : ""}`}
+      className={`bg-black border-2 border-white overflow-hidden select-none ${
+        isMobile 
+          ? "w-full cursor-default" 
+          : `cursor-move ${id === "address" ? "w-[500px]" : "w-[400px]"} max-w-[90vw]`
+      } ${isFocused && !isMobile ? "ring-2 ring-white/60" : ""}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/20">

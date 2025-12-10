@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import ContactWindow from "@/components/ContactWindow";
 
@@ -13,6 +13,9 @@ interface WindowData {
 
 export default function ContactPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  
   const [windows, setWindows] = useState<WindowData[]>([
     {
       id: "phone",
@@ -33,6 +36,14 @@ export default function ContactPage() {
       initialPosition: { x: 850, y: 300 },
     },
   ]);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const [zIndexOrder, setZIndexOrder] = useState<string[]>([
     "phone",
@@ -58,8 +69,16 @@ export default function ContactPage() {
     return zIndexOrder.indexOf(id) + 10;
   };
 
+  // Order cards: phone (1st), email (2nd), form (3rd) for mobile
+  const orderedWindows = isMobile 
+    ? [...windows].sort((a, b) => {
+        const order = ["phone", "email", "address"];
+        return order.indexOf(a.id) - order.indexOf(b.id);
+      })
+    : windows;
+
   return (
-    <div className="relative w-full h-screen overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+    <div className="relative w-full min-h-screen overflow-hidden" style={{ backgroundColor: 'transparent' }}>
       {/* Background */}
       <div className="absolute inset-0 z-[1] h-full w-full">
         <Image
@@ -72,13 +91,13 @@ export default function ContactPage() {
       </div>
 
       {/* Bordered Section for Cards */}
-      <div className="relative z-[2] w-full h-screen overflow-visible">
+      <div className={`relative z-[2] w-full ${isMobile ? 'min-h-screen overflow-y-auto' : 'h-screen overflow-visible'}`}>
         {/* Drag Container */}
         <div
           ref={containerRef}
-          className="relative w-full h-full overflow-visible"
+          className={`relative w-full ${isMobile ? 'flex flex-col gap-3 p-4 pb-8 pt-24' : 'h-full overflow-visible'}`}
         >
-          {windows.map((window) => (
+          {isMounted && orderedWindows.map((window) => (
             <ContactWindow
               key={window.id}
               id={window.id}
@@ -90,6 +109,7 @@ export default function ContactPage() {
               zIndex={getZIndex(window.id)}
               dragScope={containerRef}
               isFocused={focusedId === window.id}
+              isMobile={isMobile}
             />
           ))}
         </div>
