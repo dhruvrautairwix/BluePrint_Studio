@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useDragControls } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 
 const manifestoCopy = [
   "Blueprint 3D Studios is a visualization and design studio based in Mississauga, Canada, specializing in photorealistic 3D renders, architectural walkthroughs, and concept visualization for residential and commercial projects.",
@@ -21,7 +23,7 @@ const windowBlueprint = [
         className="relative h-full w-full flex-shrink-0"
       >
         <Image
-          src="/images/about/about-1.jpg"
+          src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1080&q=80"
           alt="Studio portrait"
           fill
           className="object-cover"
@@ -63,6 +65,7 @@ const windowBlueprint = [
 ];
 
 export default function AboutPage() {
+  const router = useRouter();
   const canvasRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -87,7 +90,14 @@ export default function AboutPage() {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    
+    // Prevent body scroll when overlay is open
+    document.body.style.overflow = "hidden";
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.body.style.overflow = "unset";
+    };
   }, []);
 
   const handleCardFocus = (cardId: string) => {
@@ -103,132 +113,173 @@ export default function AboutPage() {
     }
   };
 
+  // Handle overlay close - navigates back to home
+  const handleCloseOverlay = () => {
+    router.back();
+  };
+
   return (
-    <div className="relative min-h-screen h-screen w-full overflow-visible bg-black text-white">
-      <div className="absolute inset-0 h-full w-full">
-        <Image
-          src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1920&q=80"
-          alt="Studio background"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/70" />
-      </div>
-
-      <div className="relative flex min-h-screen flex-col overflow-visible">
-
-        <div
-          ref={canvasRef}
-          className="relative flex-1 w-full h-full overflow-visible"
+    <AnimatePresence>
+      {/* 
+        OVERLAY CONTAINER:
+        - Fixed positioning covers entire viewport
+        - High z-index ensures it's above home page
+        - Backdrop blur and darkening for visual separation
+        - Slide up animation from bottom with fade
+      */}
+      <motion.div
+        initial={{ opacity: 0, y: "100%" }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: "100%" }}
+        transition={{ 
+          duration: 0.5, 
+          ease: [0.22, 1, 0.36, 1] // Custom easing for smooth slide
+        }}
+        className="fixed inset-0 z-[100] overflow-y-auto text-white"
+        style={{ 
+          // Backdrop blur effect - minimal blur so slideshow is clearly visible
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+        }}
+      >
+        {/* Dark overlay - very light so background slideshow is clearly visible */}
+        <div className="absolute inset-0 bg-black/20" />
+        
+        {/* Close button - fixed position top right */}
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          onClick={handleCloseOverlay}
+          className="fixed top-6 right-6 z-[101] w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-110"
+          aria-label="Close overlay"
         >
-          <div className="absolute inset-0" />
-          <div className="relative w-full h-full">
-            {windowBlueprint.map((win) => {
-              const isActive = activeCard === win.id;
-              const cardZIndex = isActive ? zIndexCounter : 10;
-              const isClosed = closedWindows.has(win.id);
-              // Only apply mobile styles after mount to prevent hydration mismatch
-              const shouldUseMobileStyles = isMounted && isMobile;
-              
-              // Don't render closed windows
-              if (isClosed) return null;
-              
-              return (
-              <motion.div
-                key={win.id}
-                drag={isMounted && !isMobile}
-                dragConstraints={getDragConstraints()}
-                dragElastic={0.1}
-                dragMomentum={false}
-                onDragStart={(e) => {
-                  const target = e.target as HTMLElement;
-                  if (target.closest('button') || target.tagName === 'BUTTON') {
-                    return false;
-                  }
-                  handleCardFocus(win.id);
-                }}
-                onPointerDown={(e) => {
-                  // Only focus if not clicking on close button or scrollable content
-                  const target = e.target as HTMLElement;
-                  if (!target.closest('button') && !target.closest('[data-scrollable]')) {
-                    handleCardFocus(win.id);
-                  }
-                }}
-                initial={{
-                  opacity: 0,
-                  scale: 0.94,
-                  y: -40
-                }}
-                animate={{
-                  opacity: 1,
-                  scale: isActive ? 1.05 : 1,
-                  y: 0
-                }}
-                transition={{
-                  scale: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
-                }}
-                whileHover={isMounted && !isMobile ? { scale: isActive ? 1.05 : 1.02 } : {}}
-                className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm transition-shadow select-none ${
-                  shouldUseMobileStyles ? "relative w-full" : "absolute"
-                } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60" : ""} ${
-                  !shouldUseMobileStyles ? "cursor-move" : ""
-                }`}
-                style={{
-                  width: shouldUseMobileStyles ? "100%" : win.width,
-                  height: shouldUseMobileStyles ? "auto" : win.height,
-                  ...(shouldUseMobileStyles ? {} : { top: win.position.top, left: win.position.left }),
-                  zIndex: cardZIndex
-                }}
-              >
-                <div 
-                  className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0 cursor-move"
-                >
-                  <span>{win.title}</span>
-                  <div 
-                    className="flex items-center gap-1"
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
+          <X className="w-6 h-6 text-white" strokeWidth={2} />
+        </motion.button>
+
+        {/* Scrollable content container */}
+        {/* 
+          REMOVED BACKGROUND IMAGE:
+          - The about page background image was covering the home page slideshow
+          - Now the home page slideshow is visible through the transparent overlay
+        */}
+        <div className="relative min-h-screen w-full overflow-visible">
+          {/* Background removed - home page slideshow shows through */}
+
+          <div className="relative flex min-h-screen flex-col overflow-visible">
+            <div
+              ref={canvasRef}
+              className="relative flex-1 w-full h-full overflow-visible"
+            >
+              <div className="absolute inset-0" />
+              <div className="relative w-full h-full">
+                {windowBlueprint.map((win) => {
+                  const isActive = activeCard === win.id;
+                  const cardZIndex = isActive ? zIndexCounter : 10;
+                  const isClosed = closedWindows.has(win.id);
+                  // Only apply mobile styles after mount to prevent hydration mismatch
+                  const shouldUseMobileStyles = isMounted && isMobile;
+                  
+                  // Don't render closed windows
+                  if (isClosed) return null;
+                  
+                  return (
+                  <motion.div
+                    key={win.id}
+                    drag={isMounted && !isMobile}
+                    dragConstraints={getDragConstraints()}
+                    dragElastic={0.1}
+                    dragMomentum={false}
+                    onDragStart={(e) => {
+                      const target = e.target as HTMLElement;
+                      if (target.closest('button') || target.tagName === 'BUTTON') {
+                        return false;
+                      }
+                      handleCardFocus(win.id);
+                    }}
+                    onPointerDown={(e) => {
+                      // Only focus if not clicking on close button or scrollable content
+                      const target = e.target as HTMLElement;
+                      if (!target.closest('button') && !target.closest('[data-scrollable]')) {
+                        handleCardFocus(win.id);
+                      }
+                    }}
+                    initial={{
+                      opacity: 0,
+                      scale: 0.94,
+                      y: -40
+                    }}
+                    animate={{
+                      opacity: 1,
+                      scale: isActive ? 1.05 : 1,
+                      y: 0
+                    }}
+                    transition={{
+                      scale: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
+                    }}
+                    whileHover={isMounted && !isMobile ? { scale: isActive ? 1.05 : 1.02 } : {}}
+                    className={`mb-6 flex flex-col rounded border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-sm transition-shadow select-none ${
+                      shouldUseMobileStyles ? "relative w-full" : "absolute"
+                    } ${isActive ? "shadow-[0_20px_60px_rgba(0,0,0,0.8)] ring-2 ring-white/60" : ""} ${
+                      !shouldUseMobileStyles ? "cursor-move" : ""
+                    }`}
+                    style={{
+                      width: shouldUseMobileStyles ? "100%" : win.width,
+                      height: shouldUseMobileStyles ? "auto" : win.height,
+                      ...(shouldUseMobileStyles ? {} : { top: win.position.top, left: win.position.left }),
+                      zIndex: cardZIndex
+                    }}
                   >
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.nativeEvent.stopImmediatePropagation();
-                        handleCloseWindow(win.id, e);
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.nativeEvent.stopImmediatePropagation();
-                      }}
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.nativeEvent.stopImmediatePropagation();
-                      }}
-                      onTouchStart={(e) => {
-                        e.stopPropagation();
-                      }}
-                      className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-base leading-none hover:bg-white/10 hover:border-white/40 transition-colors cursor-pointer z-50 relative"
-                      aria-label="Close window"
-                      type="button"
-                      style={{ pointerEvents: 'auto' }}
+                    <div 
+                      className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-[0.65rem] uppercase tracking-[0.35em] flex-shrink-0 cursor-move"
                     >
-                      ×
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 min-h-0">
-                  {win.render()}
-                </div>
-              </motion.div>
-              );
-            })}
+                      <span>{win.title}</span>
+                      <div 
+                        className="flex items-center gap-1"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.nativeEvent.stopImmediatePropagation();
+                            handleCloseWindow(win.id, e);
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.nativeEvent.stopImmediatePropagation();
+                          }}
+                          onPointerDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.nativeEvent.stopImmediatePropagation();
+                          }}
+                          onTouchStart={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="inline-flex h-6 w-6 items-center justify-center rounded border border-white/20 text-base leading-none hover:bg-white/10 hover:border-white/40 transition-colors cursor-pointer z-50 relative"
+                          aria-label="Close window"
+                          type="button"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex-1 min-h-0">
+                      {win.render()}
+                    </div>
+                  </motion.div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

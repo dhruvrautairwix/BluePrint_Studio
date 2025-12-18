@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
 import { projects } from "@/utils/data";
@@ -70,11 +72,59 @@ export default function ProjectsPage() {
     : null;
 
   const handleClose = () => {
-    router.push("/");
+    router.back();
   };
 
+  // Prevent body scroll when overlay is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   return (
-    <div className="pt-20 bg-[#111] text-white min-h-screen relative z-10">
+    <AnimatePresence>
+      {/* 
+        OVERLAY CONTAINER:
+        - Fixed positioning covers entire viewport
+        - High z-index ensures it's above home page
+        - Backdrop blur and darkening for visual separation
+        - Slide up animation from bottom with fade
+      */}
+      <motion.div
+        initial={{ opacity: 0, y: "100%" }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: "100%" }}
+        transition={{ 
+          duration: 0.5, 
+          ease: [0.22, 1, 0.36, 1] // Custom easing for smooth slide
+        }}
+        className="fixed inset-0 z-[100] overflow-y-auto text-white"
+        style={{ 
+          // Backdrop blur effect - minimal blur so slideshow is clearly visible
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+        }}
+      >
+        {/* Dark overlay - very light so background slideshow is clearly visible */}
+        <div className="absolute inset-0 bg-black/20" />
+        
+        {/* Close button - fixed position top right */}
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          onClick={handleClose}
+          className="fixed top-6 right-6 z-[101] w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-110"
+          aria-label="Close overlay"
+        >
+          <X className="w-6 h-6 text-white" strokeWidth={2} />
+        </motion.button>
+
+        {/* Scrollable content container */}
+        <div className="relative min-h-screen w-full overflow-visible">
+          <div className="pt-20 bg-transparent text-white min-h-screen relative z-10">
       <ProjectModal project={selectedProjectData} onClose={handleCloseModal} />
       
       {/* Projects Header Bar - Below desktop header bar */}
@@ -215,6 +265,9 @@ export default function ProjectsPage() {
 
             </div>
           </section>
-    </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

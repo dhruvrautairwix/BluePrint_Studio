@@ -5,13 +5,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Mail, Home, Bomb, X, FolderOpen, Award, BookOpen } from "lucide-react";
+import { Globe, Mail, Home, Bomb, X, FolderOpen, Award, BookOpen, Settings } from "lucide-react";
 
-// Mmake red border around the obile menu links (Home, About, Projects, Contact)
+// Mmake red border around the obile menu links (Home, About, Projects, Services, Contact)
 const mobileNavLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/about", label: "About", icon: () => <span className="text-6xl font-bold">B</span> },
   { href: "/projects", label: "Projects", icon: Globe },
+  { href: "/services", label: "Services", icon: Settings },
   { href: "/contact", label: "Contact", icon: Mail },
 ];
 
@@ -163,32 +164,32 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className={`hidden lg:block fixed inset-x-0 top-0 z-40 px-8 xl:px-16 py-6 transition-colors duration-300 ${
+        className={`hidden lg:block fixed inset-x-0 top-0 z-[150] px-6 xl:px-12 py-4 transition-colors duration-300 ${
           isScrolled ? "bg-black" : "bg-transparent"
         }`}
       >
-        <div className="mx-auto max-w-[1800px] flex items-center justify-between gap-8">
+        <div className="mx-auto max-w-[1800px] flex items-center justify-between gap-6">
           {/* Left - Logo */}
           <div className="flex items-center justify-start flex-shrink-0">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/images/Main_Logo.png"
                 alt="Blueprint 3D Studios Logo"
-                width={60}
-                height={60}
-                className="object-contain h-14 w-14 xl:h-16 xl:w-16"
+                width={50}
+                height={50}
+                className="object-contain h-10 w-10 xl:h-12 xl:w-12"
                 priority
               />
             </Link>
             <div className="flex flex-col items-center justify-start  flex-shrink-0">
-            <p className="text-[0.65rem] xl:text-xs tracking-[0.25em] text-white/80 uppercase whitespace-nowrap">
+            <p className="text-[0.55rem] xl:text-[0.65rem] tracking-[0.25em] text-white/80 uppercase whitespace-nowrap">
               Building dreams, one pixel at a time.
             </p>
           </div>
           </div>
 
           {/* Right - Time and Location */}
-          <div className="flex items-center justify-end gap-2 xl:gap-3 text-[0.65rem] xl:text-xs tracking-[0.2em] xl:tracking-[0.25em] text-white/90 uppercase flex-shrink-0 whitespace-nowrap">
+          <div className="flex items-center justify-end gap-2 xl:gap-3 text-[0.55rem] xl:text-[0.65rem] tracking-[0.2em] xl:tracking-[0.25em] text-white/90 uppercase flex-shrink-0 whitespace-nowrap">
             {isMounted && localTime && <span>{localTime}</span>}
             {isMounted && localTime && <span>|</span>}
             <span>MISSISSAUGA</span>
@@ -207,21 +208,21 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className={`lg:hidden fixed inset-x-0 top-0 z-40 px-4 py-5 sm:px-8 transition-colors duration-300 ${
+        className={`lg:hidden fixed inset-x-0 top-0 z-[150] px-4 py-3 sm:px-6 transition-colors duration-300 ${
           isScrolled ? "bg-black" : "bg-transparent"
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-center text-center">
-          <div className="flex flex-col items-center gap-2.5">
+          <div className="flex flex-col items-center gap-2">
             {/* Logo/Brand Name */}
             <Link href="/" className="flex items-center justify-center">
-              <h1 className="text-base sm:text-lg font-bold tracking-[0.4em] text-white uppercase">
+              <h1 className="text-sm sm:text-base font-bold tracking-[0.4em] text-white uppercase">
                 BLUEPRINT 3D STUDIO
               </h1>
             </Link>
             
             {/* Time and Location Info */}
-            <div className="flex items-center gap-2.5 text-[0.7rem] sm:text-xs tracking-[0.3em] text-white/80 uppercase">
+            <div className="flex items-center gap-2 text-[0.6rem] sm:text-[0.65rem] tracking-[0.3em] text-white/80 uppercase">
               {isMounted && localTime && <span>{localTime}</span>}
               {isMounted && localTime && <span>|</span>}
               <span>MISSISSAUGA</span>
@@ -231,16 +232,16 @@ export default function Navbar() {
       </motion.div>
 
       {/* Desktop Navigation - Bottom Left */}
-      <div className="hidden lg:flex fixed bottom-8 left-16 z-50 items-center gap-8 xl:gap-10">
-        <Link href="/" className="group flex flex-col items-center gap-1.5">
+      <div className="hidden lg:flex fixed bottom-6 left-12 z-[150] items-center gap-6 xl:gap-8">
+        <Link href="/" className="group flex flex-col items-center gap-1">
           <Home
-            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
+            className={`h-5 w-5 xl:h-6 xl:w-6 transition-all ${
               pathname === "/" ? "text-white" : "text-white/70 group-hover:text-white"
             }`} 
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -248,16 +249,16 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/about" className="group flex flex-col items-center gap-1.5">
+        <Link href="/about" className="group flex flex-col items-center gap-1">
           <span
-            className={`text-2xl xl:text-3xl font-bold transition-all ${
+            className={`text-xl xl:text-2xl font-bold transition-all ${
               pathname === "/about" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
             B
           </span>
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/about" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -265,15 +266,15 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/projects" className="group flex flex-col items-center gap-1.5">
+        <Link href="/projects" className="group flex flex-col items-center gap-1">
           <Globe
-            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
+            className={`h-5 w-5 xl:h-6 xl:w-6 transition-all ${
               pathname === "/projects" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/projects" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -281,15 +282,31 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/contact" className="group flex flex-col items-center gap-1.5">
+        <Link href="/services" className="group flex flex-col items-center gap-1">
+          <Settings
+            className={`h-5 w-5 xl:h-6 xl:w-6 transition-all ${
+              pathname === "/services" ? "text-white" : "text-white/70 group-hover:text-white"
+            }`}
+            strokeWidth={1.5}
+          />
+          <span
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
+              pathname === "/services" ? "text-white" : "text-white/70 group-hover:text-white"
+            }`}
+          >
+            Services
+          </span>
+        </Link>
+
+        <Link href="/contact" className="group flex flex-col items-center gap-1">
           <Mail
-            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
+            className={`h-5 w-5 xl:h-6 xl:w-6 transition-all ${
               pathname === "/contact" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/contact" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -297,15 +314,15 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <Link href="/dynamite" className="group flex flex-col items-center gap-1.5">
+        <Link href="/dynamite" className="group flex flex-col items-center gap-1">
           <Bomb
-            className={`h-7 w-7 xl:h-8 xl:w-8 transition-all ${
+            className={`h-5 w-5 xl:h-6 xl:w-6 transition-all ${
               pathname === "/dynamite" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
             strokeWidth={1.5}
           />
           <span
-            className={`text-sm xl:text-base font-bold tracking-[0.15em] uppercase transition-all ${
+            className={`text-xs xl:text-sm font-bold tracking-[0.15em] uppercase transition-all ${
               pathname === "/dynamite" ? "text-white" : "text-white/70 group-hover:text-white"
             }`}
           >
@@ -315,7 +332,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile/Tablet Hamburger Menu Button - Full Width Black Bar at Bottom */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black py-6">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[150] bg-black py-4">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="mx-auto flex items-center justify-center text-white transition-all"
@@ -343,7 +360,7 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="lg:hidden fixed inset-0 z-40 bg-black/50"
+              className="lg:hidden fixed inset-0 z-[140] bg-black/50"
               onClick={() => setMobileMenuOpen(false)}
             />
             
@@ -353,12 +370,12 @@ export default function Navbar() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-black h-1/2 rounded-t-3xl overflow-hidden"
+              className="lg:hidden fixed bottom-0 left-0 right-0 z-[150] bg-black h-1/2 rounded-t-3xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col h-full">
-                {/* Grid Layout - 2x2 grid for 4 items */}
-                <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-px bg-black p-px">
+                {/* Grid Layout - 2x3 grid for 5 items */}
+                <div className="flex-1 grid grid-cols-2 grid-rows-3 gap-px bg-black p-px">
                   {/* Home - Top Left */}
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -416,11 +433,30 @@ export default function Navbar() {
                     </Link>
                   </motion.div>
 
-                  {/* Contact - Bottom Right */}
+                  {/* Services - Bottom Left */}
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.25 }}
+                    className="bg-black"
+                  >
+                    <Link
+                      href="/services"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="h-full w-full flex flex-col items-center justify-center gap-3 hover:bg-white/5 transition-colors"
+                    >
+                      <Settings className="h-12 w-12 text-white" strokeWidth={1.5} />
+                      <span className="text-sm font-bold tracking-[0.2em] uppercase text-white">
+                        Services
+                      </span>
+                    </Link>
+                  </motion.div>
+
+                  {/* Contact - Bottom Right */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
                     className="bg-black"
                   >
                     <Link

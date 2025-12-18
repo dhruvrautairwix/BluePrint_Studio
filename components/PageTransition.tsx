@@ -14,13 +14,14 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     setIsMounted(true);
   }, []);
 
-  // If reduced motion is preferred, render without animation
-  if (reduce) {
-    return <div className="w-full h-full min-h-screen">{children}</div>;
+  // During SSR and initial mount, render consistently to prevent hydration mismatch
+  // Always include bg-black to match client-side rendering
+  if (!isMounted) {
+    return <div className="w-full h-full min-h-screen bg-black">{children}</div>;
   }
 
-  // During SSR and initial mount, render without animation to prevent hydration mismatch
-  if (!isMounted) {
+  // If reduced motion is preferred, render without animation but with consistent className
+  if (reduce) {
     return <div className="w-full h-full min-h-screen bg-black">{children}</div>;
   }
 

@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import FloatingWindow from "@/components/FloatingWindow";
 import { dynamiteItems } from "@/utils/data";
 import Image from "next/image";
 
 export default function DynamitePage() {
+  const router = useRouter();
   const scopeRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -103,54 +106,98 @@ export default function DynamitePage() {
     setOpenIds((prev) => [...prev.filter((x) => x !== id), id]);
   };
 
-  const handleClose = (id: string) => {
+  const handleCloseWindow = (id: string) => {
     setOpenIds((prev) => prev.filter((x) => x !== id));
   };
 
+  // Handle overlay close - navigates back to home
+  const handleCloseOverlay = () => {
+    router.back();
+  };
+
+  // Prevent body scroll when overlay is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   return (
-    <div className="relative min-h-screen h-screen text-white" style={{ backgroundColor: 'transparent' }}>
-      {/* BACKGROUND */}
-      <div className="absolute inset-0 z-[1] h-full w-full">
-        <Image
-          src="/images/urban-bistro-mississauga-dining-2.png"
-          alt=""
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
-
-      {/* CONTENT */}
-      <div className="absolute inset-0 z-[2] overflow-visible">
-        <div
-          ref={scopeRef}
-          className="relative w-full h-full overflow-visible"
-          suppressHydrationWarning
+    <AnimatePresence>
+      {/* 
+        OVERLAY CONTAINER:
+        - Fixed positioning covers entire viewport
+        - High z-index ensures it's above home page
+        - Backdrop blur and darkening for visual separation
+        - Slide up animation from bottom with fade
+      */}
+      <motion.div
+        initial={{ opacity: 0, y: "100%" }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: "100%" }}
+        transition={{ 
+          duration: 0.5, 
+          ease: [0.22, 1, 0.36, 1] // Custom easing for smooth slide
+        }}
+        className="fixed inset-0 z-[100] overflow-y-auto text-white"
+        style={{ 
+          // Backdrop blur effect - minimal blur so slideshow is clearly visible
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+        }}
+      >
+        {/* Dark overlay - very light so background slideshow is clearly visible */}
+        <div className="absolute inset-0 bg-black/20" />
+        
+        {/* Close button - fixed position top right */}
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          onClick={handleCloseOverlay}
+          className="fixed top-6 right-6 z-[101] w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-110"
+          aria-label="Close overlay"
         >
-          {isMounted && (
-            <AnimatePresence>
-              {openIds.map((id) => {
-                const item = dynamiteItems.find((x) => x.id === id);
-                if (!item || !positions[item.id]) return null;
+          <X className="w-6 h-6 text-white" strokeWidth={2} />
+        </motion.button>
 
-                return (
-                  <FloatingWindow
-                    key={item.id}
-                    item={item}
-                    zIndex={openIds.indexOf(item.id) + 20}
-                    isFocused={focusedId === item.id}
-                    onFocus={handleFocus}
-                    onClose={handleClose}
-                    dragScope={scopeRef}
-                    initialPosition={positions[item.id]}
-                    isMobile={isMobile}
-                  />
-                );
-              })}
-            </AnimatePresence>
-          )}
+        {/* Scrollable content container */}
+        {/* Background removed - home page slideshow shows through */}
+        <div className="relative min-h-screen h-screen text-white" style={{ backgroundColor: 'transparent' }}>
+          {/* CONTENT */}
+          <div className="absolute inset-0 z-[2] overflow-visible">
+            <div
+              ref={scopeRef}
+              className="relative w-full h-full overflow-visible"
+              suppressHydrationWarning
+            >
+              {isMounted && (
+                <AnimatePresence>
+                  {openIds.map((id) => {
+                    const item = dynamiteItems.find((x) => x.id === id);
+                    if (!item || !positions[item.id]) return null;
+
+                    return (
+                      <FloatingWindow
+                        key={item.id}
+                        item={item}
+                        zIndex={openIds.indexOf(item.id) + 20}
+                        isFocused={focusedId === item.id}
+                        onFocus={handleFocus}
+                        onClose={handleCloseWindow}
+                        dragScope={scopeRef}
+                        initialPosition={positions[item.id]}
+                        isMobile={isMobile}
+                      />
+                    );
+                  })}
+                </AnimatePresence>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

@@ -3,41 +3,51 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
-import Image from "next/image";
-import ContactWindow from "@/components/ContactWindow";
+import { X, Box, Wrench, Boxes as Cube, Eye } from "lucide-react";
+import ServiceWindow from "@/components/ServiceWindow";
 
-interface WindowData {
+interface ServiceData {
   id: string;
   title: string;
-  content: string | string[];
+  description: string;
+  iconComponent: React.ComponentType<{ className?: string }>;
   initialPosition: { x: number; y: number };
 }
 
-export default function ContactPage() {
+export default function ServicesPage() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   
-  const [windows, setWindows] = useState<WindowData[]>([
+  const [services, setServices] = useState<ServiceData[]>([
     {
-      id: "phone",
-      title: "PHONE",
-      content: "+1 (647) 894-7187",
-      initialPosition: { x: 150, y: 100 },
+      id: "3d-animation",
+      title: "3D Animation",
+      description: "Our 3D Animation Services offer dynamic, immersive walkthroughs of your projects, allowing you to present your designs in motion and showcase every detail from all angles.",
+      iconComponent: Box,
+      initialPosition: { x: 200, y: 80 }, // First step - moved left
     },
     {
-      id: "email",
-      title: "EMAIL",
-      content: "HELLO@blueprint3dstudios.com",
-      initialPosition: { x: 530, y: 200 },
+      id: "renovation",
+      title: "Renovation Rendering Services",
+      description: "Transform your renovation ideas into vivid visualizations with our 3D Rendering Services, making it easier to visualize changes and make informed decisions.",
+      iconComponent: Wrench,
+      initialPosition: { x: 430, y: 160 }, // Second step - moved left
     },
     {
-      id: "address",
-      title: "CONTACT FORM",
-      content: [""],
-      initialPosition: { x: 850, y: 300 },
+      id: "3d-rendering",
+      title: "3D Rendering",
+      description: "Experience your projects in stunning clarity with our 3D Rendering Services, turning concepts into vivid, realistic images.",
+      iconComponent: Cube,
+      initialPosition: { x: 660, y: 240 }, // Third step - moved left
+    },
+    {
+      id: "vr-services",
+      title: "VR Services",
+      description: "Our VR Services deliver fully immersive virtual experiences, allowing you to explore and interact with your architectural designs in a realistic 3D environment.",
+      iconComponent: Eye,
+      initialPosition: { x: 890, y: 320 }, // Fourth step - moved left
     },
   ]);
 
@@ -50,9 +60,10 @@ export default function ContactPage() {
   }, []);
 
   const [zIndexOrder, setZIndexOrder] = useState<string[]>([
-    "phone",
-    "email",
-    "address",
+    "3d-animation",
+    "renovation",
+    "3d-rendering",
+    "vr-services",
   ]);
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
@@ -65,7 +76,7 @@ export default function ContactPage() {
   };
 
   const handleCloseWindow = (id: string) => {
-    setWindows((prev) => prev.filter((window) => window.id !== id));
+    setServices((prev) => prev.filter((service) => service.id !== id));
     setZIndexOrder((prev) => prev.filter((item) => item !== id));
   };
 
@@ -86,13 +97,13 @@ export default function ContactPage() {
     return zIndexOrder.indexOf(id) + 10;
   };
 
-  // Order cards: phone (1st), email (2nd), form (3rd) for mobile
-  const orderedWindows = isMobile 
-    ? [...windows].sort((a, b) => {
-        const order = ["phone", "email", "address"];
+  // Order cards for mobile
+  const orderedServices = isMobile 
+    ? [...services].sort((a, b) => {
+        const order = ["3d-animation", "renovation", "3d-rendering", "vr-services"];
         return order.indexOf(a.id) - order.indexOf(b.id);
       })
-    : windows;
+    : services;
 
   return (
     <AnimatePresence>
@@ -137,27 +148,31 @@ export default function ContactPage() {
         {/* Background removed - home page slideshow shows through */}
         <div className="relative w-full min-h-screen overflow-hidden" style={{ backgroundColor: 'transparent' }}>
           {/* Bordered Section for Cards */}
-          <div className={`relative z-[2] w-full ${isMobile ? 'min-h-screen overflow-y-auto' : 'h-screen overflow-visible'}`}>
+          <div className={`relative z-[2] w-full ${isMobile ? 'min-h-screen overflow-y-auto' : 'min-h-screen overflow-y-auto'}`}>
             {/* Drag Container */}
             <div
               ref={containerRef}
-              className={`relative w-full ${isMobile ? 'flex flex-col gap-3 p-4 pb-8 pt-24' : 'h-full overflow-visible'}`}
+              className={`relative w-full ${isMobile ? 'flex flex-col gap-3 p-4 pb-8 pt-24' : 'min-h-screen pb-8 overflow-visible'}`}
             >
-              {isMounted && orderedWindows.map((window) => (
-                <ContactWindow
-                  key={window.id}
-                  id={window.id}
-                  title={window.title}
-                  content={window.content}
-                  initialPosition={window.initialPosition}
-                  onClose={handleCloseWindow}
-                  onFocus={handleFocus}
-                  zIndex={getZIndex(window.id)}
-                  dragScope={containerRef}
-                  isFocused={focusedId === window.id}
-                  isMobile={isMobile}
-                />
-              ))}
+              {isMounted && orderedServices.map((service) => {
+                const IconComponent = service.iconComponent;
+                return (
+                  <ServiceWindow
+                    key={service.id}
+                    id={service.id}
+                    title={service.title}
+                    description={service.description}
+                    icon={<IconComponent className="w-16 h-16 text-amber-600" />}
+                    initialPosition={service.initialPosition}
+                    onClose={handleCloseWindow}
+                    onFocus={handleFocus}
+                    zIndex={getZIndex(service.id)}
+                    dragScope={containerRef}
+                    isFocused={focusedId === service.id}
+                    isMobile={isMobile}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
