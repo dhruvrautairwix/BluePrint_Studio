@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import type { KeyboardEvent, PointerEvent } from "react";
+import type { KeyboardEvent } from "react";
 import { Project } from "@/utils/data";
 
 interface ProjectCardProps {
@@ -34,18 +33,10 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
 
   const handleSelect = () => onSelect(project.slug);
 
-  const handlePointerDown = (event: PointerEvent<HTMLAnchorElement>) => {
-    if (event.button !== 0) return;
-    handleSelect();
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLAnchorElement>) => {
-    if (event.key === " " || event.key === "Spacebar") {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === " " || event.key === "Spacebar" || event.key === "Enter") {
       event.preventDefault();
-      onSelect(project.slug);
-    }
-    if (event.key === "Enter") {
-      onSelect(project.slug);
+      handleSelect();
     }
   };
 
@@ -60,14 +51,15 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
       className={`group ${noAspect ? 'h-full flex flex-col' : ''}`}
     >
       <div className={noAspect ? 'h-full flex flex-col' : ''}>
-        <Link href={`/projects/${project.slug}`} prefetch legacyBehavior>
-          <motion.a
-            layoutId={cardLayoutId}
-            className={`block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black ${noAspect ? 'h-full flex flex-col' : ''}`}
-            onPointerDown={handlePointerDown}
-            onKeyDown={handleKeyDown}
-          >
-            <div className={`relative overflow-hidden ${noAspect ? 'h-full flex-1' : 'aspect-[4/3]'} bg-gray-200 will-change-transform`}>
+        <motion.div
+          layoutId={cardLayoutId}
+          className={`block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black cursor-pointer ${noAspect ? 'h-full flex flex-col' : ''}`}
+          onClick={handleSelect}
+          onKeyDown={handleKeyDown}
+          role="button"
+          tabIndex={0}
+        >
+          <div className={`relative overflow-hidden ${noAspect ? 'h-full flex-1' : 'aspect-[4/3]'} bg-gray-200 will-change-transform`}>
             <motion.div
               layoutId={mediaLayoutId}
               className="relative w-full h-full"
@@ -100,8 +92,7 @@ export default function ProjectCard({ project, activeSlug, onSelect, noAspect }:
           <div className="mt-4 md:hidden">
             <h3 className="text-xl font-bold">{project.title}</h3>
           </div>
-        </motion.a>
-      </Link>
+        </motion.div>
       </div>
     </motion.article>
   );

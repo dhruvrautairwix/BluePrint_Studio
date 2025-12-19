@@ -124,19 +124,44 @@ export default function Navbar() {
     if (!isMounted) return;
     
     const handleScroll = () => {
+      // Check if modal is open
+      const modal = document.querySelector('[data-modal-container]') as HTMLElement;
+      if (modal) {
+        // If modal is open, check scroll position within the modal
+        // At top (0-50px): transparent, below 50px: black
+        const scrollPosition = modal.scrollTop || 0;
+        setIsScrolled(scrollPosition > 50);
+        return;
+      }
+      
       // Support both regular scroll and Lenis smooth scroll
+      // At top (0-50px): transparent, below 50px: black
       const scrollPosition = window.scrollY || document.documentElement.scrollTop || window.pageYOffset;
       setIsScrolled(scrollPosition > 50);
+    };
+
+    const handleModalScroll = (e: Event) => {
+      const modal = e.target as HTMLElement;
+      if (modal && modal.hasAttribute('data-modal-container')) {
+        // At top (0-50px): transparent, below 50px: black
+        const scrollPosition = modal.scrollTop || 0;
+        setIsScrolled(scrollPosition > 50);
+      }
     };
 
     // Listen to both scroll events (for Lenis) and regular scroll
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("wheel", handleScroll, { passive: true });
+    
+    // Listen to scroll events on modal (using capture phase to catch modal scrolls)
+    document.addEventListener("scroll", handleModalScroll, { passive: true, capture: true });
+    
     handleScroll(); // Check initial scroll position
     
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("wheel", handleScroll);
+      document.removeEventListener("scroll", handleModalScroll, { capture: true } as EventListenerOptions);
     };
   }, [isMounted]);
 

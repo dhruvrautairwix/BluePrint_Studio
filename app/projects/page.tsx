@@ -111,29 +111,19 @@ export default function ProjectsPage() {
         {/* Dark overlay - very light so background slideshow is clearly visible */}
         <div className="absolute inset-0 bg-black/20" />
         
-        {/* Close button - fixed position top right */}
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          onClick={handleClose}
-          className="fixed top-6 right-6 z-[101] w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-110"
-          aria-label="Close overlay"
-        >
-          <X className="w-6 h-6 text-white" strokeWidth={2} />
-        </motion.button>
+
 
         {/* Scrollable content container */}
         <div className="relative min-h-screen w-full overflow-visible">
           <div className="pt-20 bg-transparent text-white min-h-screen relative z-10">
       <ProjectModal project={selectedProjectData} onClose={handleCloseModal} />
       
-      {/* Projects Header Bar - Below desktop header bar */}
+      {/* Projects Header Bar - Fixed at top when scrolled */}
       <div 
-        className={`fixed top-[112px] left-0 right-0 z-[35] border-y border-white hidden lg:block transition-all duration-300 ${
+        className={`fixed left-0 right-0 z-[35] border-y border-white hidden lg:block transition-all duration-300 ${
           selectedProject ? 'opacity-0 pointer-events-none' : 'opacity-100'
         } ${
-          isScrolled ? "bg-black" : "bg-transparent"
+          isScrolled ? "bg-black top-16" : "bg-transparent top-[112px]"
         }`}
       >
         <div className="max-w-[1800px] mx-auto px-8 xl:px-16">
@@ -266,7 +256,7 @@ export default function ProjectsPage() {
 
             </div>
           </section>
-          </div>
+    </div>
         </div>
       </motion.div>
     </AnimatePresence>
