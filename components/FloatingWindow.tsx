@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useReducedMotion, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import type { DynamiteItem } from "@/utils/data";
@@ -45,8 +45,8 @@ export default function FloatingWindow({
     bottom: 10000,
   });
 
-  // Constraint calculation
-  const calculateConstraints = () => {
+  // Constraint calculation - memoized to avoid dependency issues
+  const calculateConstraints = useCallback(() => {
     if (typeof window === "undefined" || !windowRef.current)
       return { left: -10000, right: 10000, top: -10000, bottom: 10000 };
 
@@ -75,16 +75,16 @@ export default function FloatingWindow({
     };
 
     return constraints;
-  };
+  }, [windowWidth, windowHeight]);
 
-  const clamp = (cx: number, cy: number) => {
+  const clamp = useCallback((cx: number, cy: number) => {
     const c = calculateConstraints();
 
     return {
       x: Math.max(c.left, Math.min(c.right, cx)),
       y: Math.max(c.top, Math.min(c.bottom, cy)),
     };
-  };
+  }, [calculateConstraints]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -120,7 +120,8 @@ export default function FloatingWindow({
     };
 
     update();
-  }, [windowWidth, windowHeight, initialPosition, isFocused, isMounted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [windowWidth, windowHeight, initialPosition, isFocused, isMounted, calculateConstraints, clamp]);
 
   // Re-clamp on viewport resize and when card becomes focused
   useEffect(() => {
@@ -147,7 +148,8 @@ export default function FloatingWindow({
 
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [isFocused, isMounted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFocused, isMounted, calculateConstraints, clamp]);
 
   const containerClass = isMobile
     ? "relative w-full bg-black/85 text-white rounded-sm border border-white/20 overflow-hidden select-none cursor-move mb-6"

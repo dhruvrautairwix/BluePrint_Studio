@@ -50,14 +50,14 @@ export default function ProjectsPage() {
     });
   }
 
-  // Safety check: if no projects, show message
-  if (filled.length === 0) {
-    return (
-      <div className="pt-20 bg-[#111] text-white min-h-screen flex items-center justify-center">
-        <p className="text-xl">No projects found.</p>
-      </div>
-    );
-  }
+  // Prevent body scroll when overlay is open
+  // MUST be before any early returns to follow React Hooks rules
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   const handleSelect = (slug: string | null) => {
     setSelectedProject(slug);
@@ -75,13 +75,14 @@ export default function ProjectsPage() {
     router.back();
   };
 
-  // Prevent body scroll when overlay is open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
+  // Safety check: if no projects, show message
+  if (filled.length === 0) {
+    return (
+      <div className="pt-20 bg-[#111] text-white min-h-screen flex items-center justify-center">
+        <p className="text-xl">No projects found.</p>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
@@ -20,7 +20,8 @@ export default function DynamitePage() {
   const [openIds, setOpenIds] = useState<string[]>([]);
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
-  const clamp = (x: number, y: number, width: number, height: number) => {
+  // Memoize clamp function to avoid dependency issues
+  const clamp = useCallback((x: number, y: number, width: number, height: number) => {
     if (typeof window === "undefined" || isMobile) return { x: 0, y: 0 };
 
     const margin = 0; // No margin to allow full movement to edges
@@ -35,7 +36,7 @@ export default function DynamitePage() {
       x: Math.max(-maxOffsetX, Math.min(maxOffsetX, x)),
       y: Math.max(-maxOffsetY, Math.min(maxOffsetY, y)),
     };
-  };
+  }, [isMobile]);
 
   // Screen sizing - only after mount to prevent hydration issues
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function DynamitePage() {
     };
 
     wait();
-  }, [isMobile, isMounted]);
+  }, [isMobile, isMounted, clamp]);
 
   // Reveal windows one-by-one
   useEffect(() => {
